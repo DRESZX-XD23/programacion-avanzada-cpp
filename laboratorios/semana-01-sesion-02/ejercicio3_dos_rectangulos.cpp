@@ -3,7 +3,8 @@
 // Parte A: un "sistema" de dos rectangulos
 // armado con funciones sueltas y 4 variables independientes. Tiene un bug.
 //
-// TODO: el error esta en la linea 40 y 41, en lugar de decir altura 1 deberia decir altura 2, ya qeu es el otro rectangulo
+// TODO (escribe tu respuesta como comentario justo aqui):
+// En que linea esta el bug, y que deberia decir en su lugar?
 //
 //
 // Parte B: usa el struct Rectangulo del ejercicio 2 para
