@@ -24,15 +24,28 @@ Archivo: [`ejercicio1_registro_temperaturas_fuga.cpp`](./ejercicio1_registro_tem
 
 **Respuesta 1, antes de ver la solución:** si `registrarDia` crea un `RegistroTemperaturas` local y la función termina, ¿qué pasa con la memoria que reservó ese objeto?
 
-_(tu respuesta)_
+se elimina al usar el destructor
 
 **Respuesta 2:** si `main` llama a `registrarDia` tres veces seguidas, ¿cuántas veces esperas ver "Memoria liberada" en la salida?
 
-_(tu respuesta)_
+3
 
 **La formulación completa, tal como la resuelvo yo:**
 
-_(anota aquí lo que confirma la salida real, mientras se revisa en clase)_
+ RegistroTemperaturas(int nuevaCapacidad) {
+            capacidad = nuevaCapacidad;
+            lecturas = new double[capacidad];
+            std::cout << "Memoria reservada para " << capacidad << " lecturas" << std::endl;
+        }
+
+        void guardar(int indice, double valor) {
+            lecturas[indice] = valor;
+        }
+
+        double obtener(int indice) {
+            return lecturas[indice];
+        }
+ ~RegistroTemperaturas(){delete[] lecturas; std::cout<<"memoria liberada"<<std::endl;}
 
 ## Ejercicio 2: arreglar con RAII
 
@@ -40,16 +53,15 @@ Archivo: [`ejercicio2_registro_temperaturas_raii.cpp`](./ejercicio2_registro_tem
 
 **Respuesta 1, antes de ver la solución:** ¿qué necesita hacer el destructor de `RegistroTemperaturas` para que la memoria se libere sola, sin que nadie tenga que acordarse de llamar `delete[]` a mano?
 
-_(tu respuesta)_
+El destructor necesita llamar a delete[] lecturas
 
 **Respuesta 2:** después de agregar el destructor, ¿en qué momento exacto se ejecuta, si `registro` es una variable local de `registrarDia`?
 
-_(tu respuesta)_
+El destructor se ejecuta en el momento exacto en que registro sale de scope
 
 **La formulación completa, tal como la resuelvo yo:**
 
-_(anota aquí el destructor agregado y la salida verificada, mientras se revisa en clase)_
-
+~RegistroTemperaturas(){delete[] lecturas; std::cout<<"memoria liberada"<<std::endl;}
 ## Durante el ConcepTest
 
 **Tu voto, antes de discutir en pareja** (A, B, C o D):
@@ -94,4 +106,4 @@ Punteros (`Tipo* variable`, `&` para obtener una dirección, `*` para desreferen
 
 Hoy até la vida de la memoria reservada al ciclo de vida del objeto que la reserva, con RAII. Pero ¿qué pasa si alguien más guarda un puntero a esa memoria, y sigue usando ese puntero después de que el objeto dueño ya se destruyó?
 
-_(tu respuesta)_
+supongo que no podra, ya que fue destruido o le pondra un valor aleatorio.

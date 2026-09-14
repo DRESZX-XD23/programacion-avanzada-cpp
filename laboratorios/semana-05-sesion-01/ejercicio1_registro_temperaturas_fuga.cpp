@@ -2,7 +2,7 @@
 
 class RegistroTemperaturas {
     private:
-        double* lecturas;
+        double *lecturas;
         int capacidad;
     public:
         RegistroTemperaturas(int nuevaCapacidad) {
@@ -18,7 +18,7 @@ class RegistroTemperaturas {
         double obtener(int indice) {
             return lecturas[indice];
         }
-
+ ~RegistroTemperaturas(){delete[] lecturas; std::cout<<"memoria liberada"<<std::endl;}
         // TODO: falta el destructor. Sin el, la memoria de "lecturas"
         // nunca se libera cuando el objeto deja de existir.
 };
@@ -28,7 +28,9 @@ void registrarDia(int capacidad) {
     registro.guardar(0, 18.5);
     std::cout << "Lectura 0: " << registro.obtener(0) << std::endl;
     // "registro" deja de existir aqui, al cerrar este bloque.
+
 }
+
 
 int main() {
     // TODO: antes de correr, predice: ¿cuantas veces esperas ver
