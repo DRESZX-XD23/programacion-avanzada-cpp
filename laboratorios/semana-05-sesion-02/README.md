@@ -12,11 +12,11 @@ Diagnosticar y corregir fugas de memoria y punteros colgantes en código dado, d
 
 Según el artículo, ¿en qué se diferencia un puntero colgante de una fuga de memoria? Las dos son formas de mal manejo de memoria dinámica, pero no son el mismo problema.
 
-_(tu respuesta)_
+que el puntero colgane es un puntero sin memoria, y la fuga de memoria es una memoria sin puntero
 
 La sesión pasada até la vida de la memoria reservada al ciclo de vida del objeto que la reserva, con RAII. ¿Qué pasaría si alguien más guardara un puntero a esa memoria, y siguiera usando ese puntero después de que el objeto dueño ya se destruyó?
 
-_(tu respuesta)_
+Que el ciclo de vida de la memoria está atado al objeto dueño, ese objeto se encarga de liberar la memoria automáticamente en su destructor (por ejemplo al hacer delete sobre él).
 
 ## Ejercicio 1: reproducir un puntero colgante
 
@@ -24,15 +24,21 @@ Archivo: [`ejercicio1_puntero_colgante.cpp`](./ejercicio1_puntero_colgante.cpp).
 
 **Respuesta 1, antes de ver la solución:** `lectura` es una variable local de `obtenerLecturaInsegura`. ¿Qué pasa con ella cuando la función termina?
 
-_(tu respuesta)_
+se elimina
 
 **Respuesta 2:** antes de compilar, ¿qué advertencia esperas que dé el compilador sobre esta función?
 
-_(tu respuesta)_
+ da una advertencia indicando que la función está devolviendo la dirección de una variable local, ya que esa variable deja de ser válida cuando la función termina.
+
 
 **La formulación completa, tal como la resuelvo yo:**
 
-_(anota aquí la advertencia real del compilador y qué pasó al correr el programa, mientras se revisa en clase)_
+laboratorios/semana-05-sesion-02/ejercicio1_puntero_colgante.cpp:25:12: warning: address of local variable 'lectura' returned [-Wreturn-local-addr]
+   25 |     return &lectura;
+      |            ^~~~~~~~
+laboratorios/semana-05-sesion-02/ejercicio1_puntero_colgante.cpp:24:9: note: declared here
+   24 |     int lectura = valorSensor * 2;
+      |         ^~~~~~~
 
 ## Ejercicio 2: corregirlo
 
@@ -40,16 +46,29 @@ Archivo: [`ejercicio2_puntero_seguro.cpp`](./ejercicio2_puntero_seguro.cpp), mis
 
 **Respuesta 1, antes de ver la solución:** si esta función sí necesita devolver un puntero, ¿a qué debería apuntar ese puntero para que siga siendo válido después de que la función retorne?
 
-_(tu respuesta)_
+Si la función necesita devolver un puntero que debe apuntar a memoria reservada dinámicamente con new, no a una variable local.
 
 **Respuesta 2:** después de usar el puntero devuelto, ¿qué dos pasos evitan que alguien lo use por accidente después de liberado?
 
-_(tu respuesta)_
+Liberar la memoria con delete para devolverla al sistema cuando ya no se necesita.
+Asignarle nullptr al puntero después del delete.
 
 **La formulación completa, tal como la resuelvo yo:**
 
-_(anota aquí la función corregida y la salida verificada, mientras se revisa en clase)_
+int* obtenerLecturaSegura(int valorSensor) {
+    int* nombre = new int(valorSensor * 2);
+    return nombre;
+}
 
+int main() {
+    int* resultado = obtenerLecturaSegura(10);
+    std::cout << "Lectura: " << *resultado << std::endl;
+
+    delete resultado;
+    resultado = nullptr;
+
+    return 0;
+}
 ## Durante el ConcepTest
 
 **Tu voto, antes de discutir en pareja** (A, B, C o D):
@@ -91,4 +110,6 @@ Repite el mismo patrón con `ejercicio2_puntero_seguro.cpp` y `ejercicio3_invent
 
 Cada vez que una función de este laboratorio necesitó devolver algo, copiar ese algo (un `int`, un `double`) fue barato. ¿Por qué copiar un objeto grande (por ejemplo, un arreglo de un millón de elementos) sería mucho más caro que copiar un `int`, y qué alternativa a copiar se te ocurre?
 
-_(tu respuesta)_
+Copiar un int es barato porque son soloun objeto. Copiar un arreglo de un millón de elementos es caro porque hay que copiar cada elemento uno por uno, lo cual consume memoria extra.
+
+en vez de copiar el objeto completo, se puede devolver un puntero a él
