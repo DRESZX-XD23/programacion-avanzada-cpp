@@ -12,11 +12,12 @@ Reemplazar manejo manual de memoria con `new` y `delete` por smart pointers, y j
 
 Según el artículo, ¿qué tienen en común `unique_ptr`, `shared_ptr` y `weak_ptr` que los distingue de un puntero crudo administrado con `new` y `delete`?
 
-_(tu respuesta)_
+ podria ser que en los tres ya no es necesario borrarlas con delete, sino que el puntero lo hace por si solo.
 
 La sesión pasada escribiste a mano un constructor de movimiento y un operador de asignación de movimiento, para que copiar un objeto con memoria dinámica no terminara en un doble free. ¿Qué pasaría si esa lógica ya viniera resuelta dentro de un tipo de la biblioteca estándar, en vez de tener que escribirla en cada clase que reserva memoria?
 
-_(tu respuesta)_
+osea que ya no se necesita el delete dentro del destructor porque el puntero lo hace solo, ademas de que el unique ptr no se puede copiar pero si mover por si mismo
+
 
 ## Ejercicio 1: inventario con unique_ptr
 
@@ -24,15 +25,21 @@ Archivo: [`ejercicio1_inventario_con_unique_ptr.cpp`](./ejercicio1_inventario_co
 
 **Respuesta 1, antes de ver la solución:** `crearInventario` reserva memoria con `new[]` y `main` la libera con `delete[] stock;` al final. Si cambias el tipo de retorno a `std::unique_ptr<int[]>`, ¿en qué momento exacto se liberaría esa memoria, sin que nadie escriba `delete[]`?
 
-_(tu respuesta)_
+al momento de salir del scope del main 
 
 **Respuesta 2:** las funciones `mostrarInventario`, `contarProductosAgotados` y `obtenerReporteFinal` reciben `int*`, no `std::unique_ptr<int[]>`. ¿Qué método de `unique_ptr` te da acceso a ese puntero crudo, sin cederle la propiedad del recurso?
 
-_(tu respuesta)_
+Devuelve el puntero int* que el unique_ptr tieme dentro, stock sigue siendo el único dueño de liberar la memoria. 
 
 **La formulación completa, tal como la resuelvo yo:**
 
-_(anota aquí la salida real, mientras se revisa en clase)_
+Producto 0: 10 unidades
+Producto 1: 5 unidades
+Producto 2: 0 unidades
+Producto 3: 8 unidades
+Producto 4: 0 unidades
+Productos agotados: 2
+Total de unidades: 23
 
 ## Ejercicio 2: registro compartido
 
@@ -40,16 +47,28 @@ Archivo: [`ejercicio2_registro_compartido.cpp`](./ejercicio2_registro_compartido
 
 **Respuesta 1, antes de ver la solución:** si cambias `double* alturas` por `std::unique_ptr<double[]> alturas`, ¿por qué el destructor de `RegistroDeVuelo` deja de hacer falta por completo?
 
-_(tu respuesta)_
+Porque cuando se destruye el RegistroDeVuelo, también se destruye su atributo alturas, y el destructor de unique_ptr hace el delete[] automáticamente.
 
 **Respuesta 2:** `MonitorDeVuelo` necesita que dos objetos distintos (torre y cabina) lean el mismo `RegistroDeVuelo`, sin que ninguno de los dos sea el único dueño. Entre `unique_ptr` y `shared_ptr`, ¿cuál permite esto, y qué te dice `.use_count()` en cada momento?
 
-_(tu respuesta)_
-
+Se usa shared_ptr, porque permite que varios objetos sean dueños del mismo RegistroDeVuelo al mismo tiempo.use_count() indica cuántos shared_ptr son dueños del objeto en ese momento. Al crearlo vale 1. Cada monitor que se conecta guarda su propio shared_ptr, entonces seria 4. Al cerrar el bloque { }, los tres monitores se destruyen y el contador vuelve a 1. El registro se libera cuando el contador llega a 0, al terminar main.
 **La formulación completa, tal como la resuelvo yo:**
 
-_(anota aquí la salida real, con los valores de `use_count()` en cada paso, mientras se revisa en clase)_
-
+Registro de vuelo creado para 3 lecturas
+registroSolo.getAltura(0) = 100
+---
+Registro de vuelo creado para 5 lecturas
+Cuenta antes de monitoriar: 1
+Monitor: 1conectado. Cuenta 2Monitor: 2conectado. Cuenta 3Monitor: 3conectado. Cuenta 4Cuenta despues de monitores: 4
+Monitor 1 ve altura 0
+Monitor 2 ve altura 0
+Monitor 3 ve altura 0
+Monitor 3 desconectado
+Monitor 2 desconectado
+Monitor 1 desconectado
+Cuenta despues de cerrar monitores: 1
+Destruyendo registro (capacidad 5)
+Destruyendo registro (capacidad 3)
 ## Durante el ConcepTest
 
 **Tu voto, antes de discutir en pareja** (A, B, C o D):
