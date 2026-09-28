@@ -1,7 +1,7 @@
 #include <iostream>
 #include <memory>
 #include <utility>
-
+using namespace std;
 // ---------- Bateria: ya la conoces (encapsulacion, invariante con setter que devuelve bool) ----------
 class Bateria {
 private:
@@ -44,11 +44,15 @@ public:
 // - Atributos privados: double* alturas, int capacidad, int siguiente.
 // - Constructor RegistroVuelo(): capacidad = 10, reserva "alturas" con
 //   new[], siguiente = 0, imprime "Registro de vuelo creado, capacidad 10".
+
 // - void agregar(double altura): guarda en alturas[siguiente] y avanza
 //   siguiente, sin sobrepasar capacidad.
+
 // - double getAltura(int indice): si alturas es nullptr, imprime
 //   "Registro vacio (fue movido)" y devuelve 0.0; si no, devuelve
 //   alturas[indice].
+
+
 // - Constructor de movimiento RegistroVuelo(RegistroVuelo&& otro): roba
 //   alturas, capacidad y siguiente de "otro", y deja "otro" vacio y seguro
 //   (alturas = nullptr, capacidad = 0, siguiente = 0).
@@ -58,7 +62,68 @@ public:
 // - Destructor ~RegistroVuelo(): libera con delete[] e imprime
 //   "Destruyendo registro de vuelo (capacidad <capacidad>)".
 class RegistroVuelo {
+private:
+    double* alturas;
+    int capacidad;
+    int siguiente;
+
+public:
+    RegistroVuelo() {
+        capacidad = 10;
+        alturas = new double[capacidad];
+        siguiente = 0;
+        cout << "Registro de vuelo creado, capacidad 10" << endl;
+    }
+
+    void agregar(double altura) {
+        if (alturas != nullptr && siguiente < capacidad) {
+            alturas[siguiente] = altura;
+            siguiente = siguiente + 1;
+        }
+    }
+
+    double getAltura(int indice) {
+        if (alturas == nullptr) {
+            cout << "Registro vacio (fue movido)" << endl;
+            return 0.0;
+        }
+        return alturas[indice];
+    }
+
+    // Constructor de movimiento: roba los recursos de "otro"
+    RegistroVuelo(RegistroVuelo&& otro) {
+        alturas = otro.alturas;
+        capacidad = otro.capacidad;
+        siguiente = otro.siguiente;
+
+        // deja a "otro" vacio y seguro
+        otro.alturas = nullptr;
+        otro.capacidad = 0;
+        otro.siguiente = 0;
+    }
+
+    // Asignacion de movimiento: libera lo propio y roba lo de "otro"
+    RegistroVuelo& operator=(RegistroVuelo&& otro) {
+        if (this != &otro) {
+            delete[] alturas;
+
+            alturas = otro.alturas;
+            capacidad = otro.capacidad;
+            siguiente = otro.siguiente;
+
+            otro.alturas = nullptr;
+            otro.capacidad = 0;
+            otro.siguiente = 0;
+        }
+        return *this;
+    }
+
+    ~RegistroVuelo() {
+        cout << "Destruyendo registro de vuelo (capacidad " << capacidad << ")" << endl;
+        delete[] alturas;   // delete[] sobre nullptr es seguro
+    }
 };
+
 
 // ---------- Aeronave: ya la conoces (base de una jerarquia con herencia publica) ----------
 class Aeronave {
@@ -85,13 +150,12 @@ public:
             return false;
         }
         altitud = altitudCrucero;
-        std::cout << "Aeronave " << id << " despega a " << altitud << " metros" << std::endl;
+        cout << "Aeronave " << id << " despega a " << altitud << " metros" << std::endl;
         return true;
     }
 
-    void aterrizar() {
-        altitud = 0.0;
-        std::cout << "Aeronave " << id << " aterriza" << std::endl;
+    void aterrizar() {altitud = 0.0;
+        cout << "Aeronave " << id << " aterriza" << std::endl;
     }
 
     double getAltitud() {
@@ -106,6 +170,7 @@ public:
 //   construye solo, con su propio constructor por defecto, antes de que
 //   corra el cuerpo del constructor de Dron, igual que Motor dentro de
 //   Carro en la Semana 4).
+
 // - Constructor Dron(int id, double capacidadBateria): usa el setter
 //   heredado setId(id) (Aeronave no tiene un constructor con parametros
 //   que puedas llamar aqui), y configura bateria con setCapacidad(...) y
@@ -120,51 +185,112 @@ public:
 // - double getAltitudRegistrada(int indice): delega en
 //   registro.getAltura(indice).
 // - double getCargaActual(): delega en bateria.getCargaActual().
-class Dron {
-};
+class Dron : public Aeronave {
+private:
+    Bateria bateria;
+    RegistroVuelo registro;
+public:
+    Dron(int id, double capacidadBateria) {
+        setId(id);                              // heredado de Aeronave
+        bateria.setCapacidad(capacidadBateria);
+        bateria.recargar();}
 
+    bool puedeDespegar(double consumoEstimado) {
+        return bateria.getCargaActual()>=consumoEstimado;
+    }
+    bool realizarVuelo(double altitudCrucero, double consumoBateria) {
+        if (puedeDespegar(consumoBateria) == false) {
+            cout<<"Dron "<< getId() << " no tiene carga suficiente" << endl;
+            return false;
+        }
+
+        despegar(altitudCrucero);            // heredado de Aeronave
+        registro.agregar(altitudCrucero);    // atributo registro
+        bateria.descargar(consumoBateria);   // atributo bateria
+        aterrizar();                         // heredado de Aeronave
+        return true;}
+    double getAltitudRegistrada(int indice) {
+        return registro.getAltura(indice);}
+
+    double getCargaActual() {return bateria.getCargaActual();}
+};
 // ---------- TorreControl: ya la conoces (recurso que varias Estacion van a compartir) ----------
 class TorreControl {
 private:
-    int totalDespachos;
+int totalDespachos;
 
 public:
-    TorreControl() {
-        totalDespachos = 0;
-        std::cout << "Torre de control creada" << std::endl;
+    TorreControl() { totalDespachos = 0;
+        cout << "Torre de control creada" <<endl;
     }
 
-    void registrarDespacho() {
-        totalDespachos = totalDespachos + 1;
-    }
+    void registrarDespacho() { totalDespachos = totalDespachos + 1;}
 
-    int getTotalDespachos() {
-        return totalDespachos;
-    }
+    int getTotalDespachos() { return totalDespachos;}
 
-    ~TorreControl() {
-        std::cout << "Destruyendo torre de control (" << totalDespachos << " despachos)" << std::endl;
+    ~TorreControl() {cout <<"Destruyendo torre de control ("<<totalDespachos<<" despachos)"<<endl;
     }
 };
-
 // TODO: Estacion (smart pointers, Semana 6 Sesion 2).
 // - Atributos privados: int idEstacion; std::unique_ptr<Dron> dronAsignado
 //   (propiedad exclusiva del dron que tiene asignado en este momento, o
 //   vacio); std::shared_ptr<TorreControl> torre (comparte la torre con las
 //   demas estaciones).
+
+
+
+
 // - Constructor Estacion(int id, std::shared_ptr<TorreControl>
 //   torreCompartida): guarda id, guarda torreCompartida en torre, imprime
 //   "Estacion <id> conectada a la torre, use_count = <torre.use_count()>".
+
+
+
 // - void asignarDron(std::unique_ptr<Dron> dron): usa std::move para
 //   transferir "dron" a dronAsignado, llama torre->registrarDespacho(), e
 //   imprime "Estacion <id> recibe el dron <id del dron>".
+
+
+
 // - std::unique_ptr<Dron> liberarDron(): imprime "Estacion <id> libera su
 //   dron" y devuelve dronAsignado movido con std::move (dronAsignado queda
 //   en nullptr).
+
+
 // - bool tieneDron(): true si dronAsignado no es nullptr.
+
+
 // - Dron* verDron(): devuelve el puntero crudo con .get(), sin ceder la
 //   propiedad.
 class Estacion {
+private:
+int idEstacion;
+    std::unique_ptr<Dron> dronAsignado;
+    std::shared_ptr<TorreControl> torre;
+public:
+    Estacion(int id, std::shared_ptr<TorreControl> torreCompartida) {
+        idEstacion = id;
+    // std::move para no dejar una copia extra en el parametro:
+    // asi use_count cuenta solo a main y a las estaciones
+        torre = std::move(torreCompartida);
+        cout<<"Estacion " << idEstacion << "conectada a la torre, use_count = "
+             << torre.use_count() << endl;
+    }
+
+    void asignarDron(std::unique_ptr<Dron> dron) {
+        dronAsignado = std::move(dron);
+        torre->registrarDespacho();
+        cout << "Estacion " << idEstacion <<" recbe el dron "
+             << dronAsignado->getId() << endl;
+    }
+
+    std::unique_ptr<Dron> liberarDron() {
+        cout << "Estacion " << idEstacion << " libera su dron"<<endl;
+    return std::move(dronAsignado);   // dronAsignado queda en nullptr
+    }
+
+    bool tieneDron(){        return dronAsignado != nullptr;}
+    Dron* verDron(){return dronAsignado.get();        }
 };
 
 int main() {
@@ -174,28 +300,30 @@ int main() {
     registroTemporal.agregar(999.0);
 
     // Crear el registro final moviendo el registro temporal a registroFinal
-    RegistroVuelo registroFinal(// TODO);
+    RegistroVuelo registroFinal(std::move(registroTemporal));
     std::cout << "registroFinal.getAltura(0): " << registroFinal.getAltura(0) << std::endl;
     std::cout << "registroTemporal tras moverlo: ";
     registroTemporal.getAltura(0);
 
     // Crear la primera torre de control como un puntero compartido
-    auto torre = // TODO
-    std::cout << "use_count inicial: " << /* TODO: Contar cuantos punteros a memoria hay en torre */ << std::endl;
+    auto torre = std::make_shared<TorreControl>();
+    // Contar cuantos punteros a memoria hay en torre
+    std::cout << "use_count inicial: " << torre.use_count() << std::endl;
 
     Estacion base1(1, torre);
     Estacion base2(2, torre);
 
-    std::cout << "use_count tras conectar 2 estaciones: " << /* TODO: Contar cuantos punteros a memoria hay en torre */ << std::endl;
+    // Contar cuantos punteros a memoria hay en torre
+    std::cout << "use_count tras conectar 2 estaciones: " << torre.use_count() << std::endl;
 
     // Crear dron1 como un puntero unico con los valores (101, 80.0)
-    auto dron1 = // TODO
+    auto dron1 = std::make_unique<Dron>(101, 80.0);
 
     // Realizar un vuelo con el dron con a una altitud de 120 y un consumo de bateria de 15
-    // TODO
-    
-    // Asignar dron1 a la base1, moviendo dron1 
-    // TODO
+    dron1->realizarVuelo(120.0, 15.0);
+
+    // Asignar dron1 a la base1, moviendo dron1
+    base1.asignarDron(std::move(dron1));
 
     if (base1.tieneDron()) {
         base1.verDron()->realizarVuelo(150.0, 20.0);
@@ -204,11 +332,11 @@ int main() {
     }
 
     // Liberar el dron de base1, el dron liberado luego va a ser transferido a la base 2
-    // TODO
+    auto dronTransferido = base1.liberarDron();
     std::cout << "base1 tiene dron tras liberar: " << base1.tieneDron() << std::endl;
 
     // Asignar el dron transferido a la base2
-    base2.asignarDron(// TODO);
+    base2.asignarDron(std::move(dronTransferido));
 
     if (base2.tieneDron()) {
         base2.verDron()->realizarVuelo(100.0, 10.0);
@@ -217,7 +345,7 @@ int main() {
                    << base2.verDron()->getAltitudRegistrada(0) << std::endl;
     }
 
-    std::cout << "Total despachos registrados por la torre: " << torre->getTotalDespachos() << std::endl;
+    cout << "Total despachos registrados por la torre: " << torre->getTotalDespachos() << std::endl;
 
     return 0;
 }
