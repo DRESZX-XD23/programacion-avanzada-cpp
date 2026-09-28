@@ -17,12 +17,18 @@ private:
     double altitudMaxima;
 public:
     bool setAltitudMaxima(double a) {
+        if(a>0 and a <=15000 ){
+            altitudMaxima=a;
+            return true;
+        }else{
+            return false;
+        }
         // TODO: valida que a sea mayor a 0 y menor o igual a 15000.
-        return false;
+        
     }
     double getAltitudMaxima() {
         // TODO: devuelve altitudMaxima.
-        return 0;
+        return altitudMaxima;
     }
 };
 
@@ -31,12 +37,16 @@ private:
     double profundidadMaxima;
 public:
     bool setProfundidadMaxima(double p) {
+        if(p>0 and p<=300){
+            profundidadMaxima=p;
+            return true;
+        }else{return false;}
         // TODO: valida que p sea mayor a 0 y menor o igual a 300.
-        return false;
+        
     }
     double getProfundidadMaxima() {
         // TODO: devuelve profundidadMaxima.
-        return 0;
+        return profundidadMaxima;
     }
 };
 
@@ -46,11 +56,15 @@ private:
 public:
     bool setNumeroTripulantes(int n) {
         // TODO: valida que n sea mayor a 0 y menor o igual a 20.
-        return false;
+       if(n>0 and n<=20){
+        numeroTripulantes=n;
+        return true; 
+       }
+        else{return false; };
     }
     int getNumeroTripulantes() {
         // TODO: devuelve numeroTripulantes.
-        return 0;
+        return numeroTripulantes;
     }
 };
 

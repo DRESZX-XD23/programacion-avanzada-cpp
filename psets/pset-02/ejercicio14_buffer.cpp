@@ -16,6 +16,7 @@
 // Fin del programa
 
 #include <iostream>
+using namespace std;
 
 class Buffer {
 private:
@@ -31,6 +32,9 @@ public:
         std::cout << "Buffer de " << tamano << " creado" << std::endl;
     }
     ~Buffer() {
+       delete[] datos;
+       datos= nullptr;
+       cout<<"Buffer liberado "<<endl;
         // TODO: esta es la fuga. Libera datos con delete[], y despues imprime
         // "Buffer liberado" seguido de un salto de linea.
     }

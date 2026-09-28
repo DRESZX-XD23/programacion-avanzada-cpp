@@ -10,18 +10,23 @@
 // Figura 7, radio 5.5
 
 #include <iostream>
-
+using namespace std;
 class Figura {
 private:
     int nombreCodigo;
 public:
     bool setNombreCodigo(int n) {
+        if(n<=99 and n >=1){
+            nombreCodigo=n;
+            return true;
+        }else{return false;}
+        
         // TODO: valida que n este entre 1 y 99 (ambos incluidos).
-        return false;
+        
     }
     int getNombreCodigo() {
         // TODO: devuelve nombreCodigo.
-        return 0;
+        return nombreCodigo;
     }
 };
 
@@ -31,15 +36,20 @@ private:
 public:
     bool setRadio(double r) {
         // TODO: valida que r sea mayor a 0 y menor o igual a 1000.
-        return false;
+        if(r<=1000 and r >0){
+            radio=r;
+            return true;
+        }else{return false;}
+
     }
     double getRadio() {
         // TODO: devuelve radio.
-        return 0;
+        return radio;
     }
 };
 
 std::ostream& operator<<(std::ostream& os, Circulo c) {
+    os<<"Figura "<< c.getNombreCodigo()<< ", radio "<< c.getRadio();
     // TODO: escribe en os "Figura " + nombreCodigo (heredado) + ", radio " + radio.
     // Devuelve os.
     return os;

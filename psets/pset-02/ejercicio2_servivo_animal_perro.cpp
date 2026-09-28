@@ -12,18 +12,26 @@
 // Rescatado: true
 
 #include <iostream>
-
+using namespace std;
 class SerVivo {
 private:
     int edadAnios;
 public:
     bool setEdadAnios(int e) {
         // TODO: valida que e este entre 0 y 100 (ambos incluidos).
-        return false;
+        if (e<=100 and e>=0){
+            edadAnios=e;
+            return true;
+        }else{
+
+            return false;
+        }
+        
+        
     }
     int getEdadAnios() {
         // TODO: devuelve edadAnios.
-        return 0;
+        return edadAnios;
     }
 };
 
@@ -33,11 +41,17 @@ private:
 public:
     bool setNumeroPatas(int p) {
         // TODO: valida que p este entre 0 y 8 (ambos incluidos).
-        return false;
+        if(p<=8 and p>=0){
+            numeroPatas=p;
+            return true;
+        }else{
+            return false;
+        }
+        
     }
     int getNumeroPatas() {
         // TODO: devuelve numeroPatas.
-        return 0;
+        return numeroPatas;
     }
 };
 
@@ -46,13 +60,16 @@ private:
     bool esRescatado;
 public:
     void setEsRescatado(bool r) {
+        esRescatado=r;
         // TODO: asigna esRescatado. No hay invariante que validar.
     }
     bool getEsRescatado() {
         // TODO: devuelve esRescatado.
-        return false;
+        
+        return esRescatado;
     }
     void ladrar() {
+        cout<<"Guau guau"<<endl;
         // TODO: imprime "Guau guau" seguido de un salto de linea.
     }
 };

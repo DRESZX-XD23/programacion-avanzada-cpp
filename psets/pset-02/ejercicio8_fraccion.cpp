@@ -11,13 +11,20 @@
 // 5/1
 
 #include <iostream>
-
+using namespace std;
 class Fraccion {
 private:
     int numerador;
     int denominador;
 public:
     Fraccion(int num, int denom) {
+        numerador= num;
+        if(denom!=0 ){
+            denominador=denom;
+        }else{
+            cout<<"Denominador invalido, se asigna 1 por defecto";
+            denominador=1;
+        }
         // TODO: asigna numerador directamente.
         // TODO: si denom es distinto de 0, asigna denominador = denom.
         // Si denom es 0, imprime "Denominador invalido, se asigna 1 por defecto"
@@ -25,15 +32,16 @@ public:
     }
     int getNumerador() {
         // TODO: devuelve numerador.
-        return 0;
+        return numerador;
     }
     int getDenominador() {
         // TODO: devuelve denominador.
-        return 0;
+        return denominador;
     }
 };
 
 std::ostream& operator<<(std::ostream& os, Fraccion f) {
+    os<< f.getNumerador()<<"/"<<f.getDenominador(); 
     // TODO: escribe en os el numerador, seguido de "/", seguido del denominador.
     // Devuelve os.
     return os;

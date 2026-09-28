@@ -17,30 +17,44 @@
 // Registro de temperaturas liberado
 
 #include <iostream>
-
+using namespace std;
 class RegistroTemperaturas {
 private:
     double* lecturas;
     int cantidad;
 public:
     RegistroTemperaturas(int n) {
+        cantidad=n;
+        lecturas = new double[n];
+         for(int k=0;k<n;k++){
+            lecturas[k]=0;
+        }
         // TODO: asigna cantidad = n.
         // TODO: reserva con new[] un arreglo de cantidad doubles y guardalo en lecturas.
         // TODO: en un bucle, inicializa cada posicion de lecturas en 0.0.
     }
     ~RegistroTemperaturas() {
+       delete[] lecturas;
+       lecturas= nullptr;
+       cout<<"Registro de temperaturas liberado"<<endl;
         // TODO: libera lecturas con delete[].
         // TODO: imprime "Registro de temperaturas liberado" seguido de un salto de linea.
     }
     bool setLectura(int indice, double valor) {
+        if(indice >=0 and indice <cantidad){
+            lecturas[indice]= valor;
+            return true;
+        }else{return false;}
         // TODO: valida que indice este entre 0 (incluido) y cantidad (excluido).
-        return false;
     }
     double* buscarValor(double objetivo) {
+        for(int d=0;d < cantidad;d++){
+        if(lecturas[d]==objetivo){
+            return &lecturas[d];}
+        }return nullptr;
         // TODO: recorre lecturas. Si encuentras una posicion igual a objetivo,
         // devuelve la direccion de esa posicion dentro del arreglo (con &).
         // Si no encuentras ninguna, devuelve nullptr.
-        return nullptr;
     }
 };
 
