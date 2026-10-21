@@ -1,20 +1,20 @@
 #include <iostream>
 #include <memory>
 
+// clase abstracta, no se pueden crar objetos de eso
+// es una tiene almenos una funcion virtual pura =0
+// clase padre, sus clases hijas obligadas a poner todas sus funciones
+// siempre poner la padre con PUNTEROS
+// Interfaz una clase abstracta que solo tuene FuncinesVirtualesPuras y el destructor   
+// clase abstracta ambas puras y otras
 class Figura {
     public:
         // TODO (paso 1): ninguna Figura "generica" tiene un area ni un
         // nombre que tenga sentido. Convierte estos dos metodos en
         // funciones virtuales puras.
-        virtual double area() {
-            return 0.0;
-        }
-
-        virtual void imprimirNombre() {
-            std::cout << "Figura";
-        }
-
-        void describir() {
+        virtual double area() =0;
+        virtual void imprimirNombre()=0;
+        void describir() { // interfaz
             imprimirNombre();
             std::cout << " de area " << area() << std::endl;
         }
@@ -72,7 +72,9 @@ class Triangulo : public Figura {
         void imprimirNombre() override {
             std::cout << "Triangulo";
         }
-
+        double area() override{
+            return (base * altura)/2;
+        }
         // TODO (paso 3): despues del paso 1, compila y lee el error que
         // aparece en main. Agrega lo que le falta a Triangulo.
 };

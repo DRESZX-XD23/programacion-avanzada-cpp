@@ -12,11 +12,13 @@ Diseñar una interfaz común mediante clases abstractas y funciones virtuales pu
 
 Según el artículo, ¿qué dice el principio de inversión de dependencias sobre de quién debe depender una clase de alto nivel? ¿Qué problema describe el principio de segregación de interfaces?
 
-_(tu respuesta)_
+DIP: una clase de alto nivel debe depender de abstracciones no de clases concretas. 
+
+ISP: describe el problema de las interfaces grandes que obligan a las clases a implementar métodos que no usan
 
 La sesión pasada, `Figura::area()` devolvía 0 solo porque algo tenía que devolver. ¿Tiene sentido crear un objeto que sea solo una `Figura`? Si no, ¿qué debería hacer el compilador cuando alguien lo intenta?
 
-_(tu respuesta)_
+dar error, al hacerla funcion pura con el cirtual y el =0
 
 ## Ejercicio 1: Figura abstracta
 
@@ -24,15 +26,112 @@ Archivo: [`ejercicio1_figura_abstracta.cpp`](./ejercicio1_figura_abstracta.cpp).
 
 **Respuesta 1, antes de ver la solución:** después de convertir `area()` e `imprimirNombre()` en virtuales puras, ¿qué pasa con la línea `Figura generica;` si le quitas el comentario?
 
-_(tu respuesta)_
+Da error
 
 **Respuesta 2:** `Triangulo` no implementa `area()`. ¿En qué línea aparece el error, y qué le falta a `Triangulo` para que se pueda crear?
 
-_(tu respuesta)_
-
+a triangulo de lalta la funcion area de la padre figura
+en la linea de main, en figuras[2] = std::make_unique<Triangulo>(4.0, 3.0)
 **La formulación completa, tal como la resuelvo yo:**
 
-_(anota aquí los dos mensajes de error y la salida final)_
+#include <iostream>
+#include <memory>
+
+// clase abstracta, no se pueden crar objetos de eso
+// es una tiene almenos una funcion virtual pura =0
+// clase padre, sus clases hijas obligadas a poner todas sus funciones
+// siempre poner la padre con PUNTEROS
+// Interfaz una clase abstracta que solo tuene FuncinesVirtualesPuras y el destructor   
+// clase abstracta ambas puras y otras
+class Figura {
+    public:
+        // TODO (paso 1): ninguna Figura "generica" tiene un area ni un
+        // nombre que tenga sentido. Convierte estos dos metodos en
+        // funciones virtuales puras.
+        virtual double area() =0;
+        virtual void imprimirNombre()=0;
+        void describir() { // interfaz
+            imprimirNombre();
+            std::cout << " de area " << area() << std::endl;
+        }
+
+        virtual ~Figura() {
+        }
+};
+
+class Circulo : public Figura {
+    private:
+        double radio;
+    public:
+        Circulo(double nuevoRadio) {
+            radio = nuevoRadio;
+        }
+
+        double area() override {
+            return 3.14159 * radio * radio;
+        }
+
+        void imprimirNombre() override {
+            std::cout << "Circulo";
+        }
+};
+
+class Rectangulo : public Figura {
+    private:
+        double base;
+        double altura;
+    public:
+        Rectangulo(double nuevaBase, double nuevaAltura) {
+            base = nuevaBase;
+            altura = nuevaAltura;
+        }
+
+        double area() override {
+            return base * altura;
+        }
+
+        void imprimirNombre() override {
+            std::cout << "Rectangulo";
+        }
+};
+
+class Triangulo : public Figura {
+    private:
+        double base;
+        double altura;
+    public:
+        Triangulo(double nuevaBase, double nuevaAltura) {
+            base = nuevaBase;
+            altura = nuevaAltura;
+        }
+
+        void imprimirNombre() override {
+            std::cout << "Triangulo";
+        }
+        double area() override{
+            return (base * altura)/2;
+        }
+        // TODO (paso 3): despues del paso 1, compila y lee el error que
+        // aparece en main. Agrega lo que le falta a Triangulo.
+};
+
+int main() {
+    // TODO (paso 2): despues del paso 1, quita el comentario de la
+    // siguiente linea, compila, lee el error y vuelve a comentarla.
+    // Figura generica;
+
+    std::unique_ptr<Figura> figuras[3];
+    figuras[0] = std::make_unique<Circulo>(1.0);
+    figuras[1] = std::make_unique<Rectangulo>(2.0, 3.0);
+    figuras[2] = std::make_unique<Triangulo>(4.0, 3.0);
+
+    for (int i = 0; i < 3; i++) {
+        figuras[i]->describir();
+    }
+
+    return 0;
+}
+
 
 ## Durante el ConcepTest
 
@@ -56,7 +155,7 @@ Archivo: [`ejercicio2_estacion_meteorologica.cpp`](./ejercicio2_estacion_meteoro
 
 Antes de dar el ejercicio por terminado, responde: si mañana agregas un `Higrometro` (humedad en %), ¿qué líneas de `EstacionMeteorologica` tienes que cambiar?
 
-_(tu respuesta)_
+Solo se crea la clase Higrometro : public IMedidor con sus tres métodos. EstacionMeteorologica no cambia.
 
 ## Ejercicio 3: dispositivos de oficina
 
@@ -66,11 +165,10 @@ El archivo compila y corre tal como está, con una sola interfaz `IDispositivoOf
 
 Antes de escribir código, responde: `Multifuncional` va a heredar de tres clases a la vez. En la Semana 4, una herencia así terminó en el problema del diamante. ¿Por qué aquí no aparece?
 
-_(tu respuesta)_
-
+ El diamante aparece cuando dos padres heredan de un mismo abuelo y la hija termina con dos copias de él. y aqui no aparece porque no heredan una clase basica en comun
 Al terminar, prueba guardar `&basica` en el arreglo de escáneres. ¿Qué dice el compilador?
 
-_(tu respuesta)_
+No compila. El compilador dice que no puede convertir ImpresoraBasica* a IDispositivoQueescanea*, porque ImpresoraBasica no hereda de esa interfaz.
 
 ## Compilar y ejecutar
 
@@ -91,4 +189,4 @@ Función virtual pura (`virtual tipo nombre(parámetros) = 0;`) y clase abstract
 
 Necesitas una función `mayor` que devuelva el mayor de dos valores para `int`, para `double` y para `char`. Con lo que sabes hoy, ¿cuántas funciones escribes, y qué cambia entre ellas además del tipo?
 
-_(tu respuesta)_
+serian tres, no cambiararia nada, solo el tipo int, double, char
