@@ -1,5 +1,5 @@
 #include <iostream>
-
+using namespace std;
 // Salida esperada:
 // Suma de pasos: 9300
 // Suma de temperaturas: 64.5
@@ -38,10 +38,30 @@ std::ostream& operator<<(std::ostream& os, Vector2D v) {
 // TODO: escribe la plantilla de funcion sumarArreglo(datos, cantidad),
 // que recibe un arreglo de T y su cantidad de elementos y devuelve la
 // suma de todos. Tiene que funcionar para int, double y Vector2D.
-
+template<typename T>
+T sumarArreglo( T datos[], int cantidad){
+    T tot=datos[0];
+    for(int i=1;i<cantidad;i++){
+        tot= tot+datos[i];
+    };
+    
+    return tot;
+};
 // TODO: escribe la plantilla de funcion contarMayoresQue(datos, cantidad,
 // umbral), que devuelve cuantos elementos del arreglo son mayores que
 // umbral (un int).
+template<typename T>
+int contarMayoresQue( T datos[], int cantidad, T umbral){
+    int tot=0;
+    for(int i=0;i<cantidad;i++){
+        if(umbral<datos[i]){
+            tot=tot+1;
+        };
+    };
+    
+    return tot;
+};
+
 
 int main() {
     int pasos[3] = {4200, 1800, 3300};

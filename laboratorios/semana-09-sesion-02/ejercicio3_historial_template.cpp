@@ -12,14 +12,67 @@
 
 // TODO: escribe la plantilla de clase Historial, que guarda hasta
 // "capacidad" valores de cualquier tipo T.
-// - Atributos privados: los valores, en un std::unique_ptr a un arreglo de
-//   T creado en el constructor; la capacidad; cuantos valores ya se usaron.
-// - Constructor que recibe la capacidad (int).
-// - bool agregar(T valor): guarda el valor en la siguiente posicion libre
-//   y devuelve true; si ya esta lleno, devuelve false sin guardar nada.
-// - T obtener(int indice) y T ultimo() (el ultimo valor agregado).
-// - int getUsadas() e int getCapacidad().
-// - Sin destructor.
+
+template<typename T>
+class Historial {
+    private:
+        std::unique_ptr<T[]> valores;   
+        int capacidad;                  
+        int usadas;                     
+
+    public:
+        Historial(int cap) {
+            capacidad = cap;
+            usadas = 0;                               
+            valores = std::make_unique<T[]>(capacidad); 
+        }
+
+        bool agregar(T valor) {
+            // guarda el valor en la siguiente posicion libre
+           //   y devuelve true; si ya esta lleno, devuelve false sin guardar nada.
+           if(capacidad>usadas){
+           
+            valores[usadas]=valor;
+            usadas=usadas+1;
+            return true;
+           }
+           return false;
+        }
+
+        T obtener(int indice) {
+            return valores[indice];
+        }
+
+        T ultimo() {
+    
+            return valores[usadas-1];
+        }
+
+        int getUsadas() {
+            return usadas;
+        }
+
+        int getCapacidad() {
+            return capacidad;
+        }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 int main() {
     Historial<int> pasos(5);
