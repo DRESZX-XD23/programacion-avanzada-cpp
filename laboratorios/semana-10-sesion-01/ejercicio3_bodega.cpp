@@ -1,55 +1,70 @@
 #include <iostream>
+#include <vector>
+#include <map>
+#include <set>
 
-// Salida esperada:
-// Stock: 120=2 210=5 305=10
-// Retirar 1 de 120: aceptado
-// Retirar 4 de 305: aceptado
-// Retirar 1 de 120: aceptado
-// Retirar 1 de 120: rechazado
-// Retirar 1 de 999: rechazado
-// Retirar 5 de 210: aceptado
-// Reingreso de 3 unidades de 120
-// Retirar 3 de 120: aceptado
-// Stock: 120=0 210=0 305=6
-// Stock de 999: 0
-// Productos registrados: 3
-// Retiros: 120 305 120 210 120
-// Tercer retiro: 120
-// Agotados alguna vez: 120 210
+class Bodega {
+    private:
+        std::map<int, int> stock;
+        std::vector<int> retiros;
+        std::set<int> agotados;
 
-// TODO: escribe la clase Bodega, la bodega de componentes del laboratorio
-// de electronica. Cada producto se identifica con un codigo (int).
-// Tu decides que contenedor de la STL usa cada atributo: elige segun
-// como se consulta y como se modifica cada dato, e incluye arriba los
-// encabezados que necesites.
-//
-// Atributos privados:
-// - El stock de cada codigo.
-// - El historial de retiros: el codigo de cada retiro aceptado, en el
-//   orden en que ocurrio, con repeticiones.
-// - Los codigos que se quedaron en 0 alguna vez, sin repetir, ordenados
-//   de menor a mayor.
-//
-// Metodos publicos:
-// - void ingresar(int codigo, int cantidad): suma cantidad al stock del
-//   codigo (si el codigo es nuevo, empieza en 0).
-// - bool retirar(int codigo, int cantidad): si el codigo no existe, o su
-//   stock es menor que cantidad, devuelve false sin cambiar nada (y sin
-//   registrar el codigo). Si alcanza, resta, agrega el codigo al
-//   historial de retiros, y si el stock queda en 0 lo agrega a los
-//   agotados. Devuelve true.
-// - int stockDe(int codigo): el stock del codigo, o 0 si no existe, sin
-//   registrar el codigo.
-// - int cantidadDeProductos(): cuantos codigos distintos tienen stock
-//   registrado.
-// - int retiroNumero(int posicion): el codigo del retiro en esa posicion
-//   del historial, contando desde 0.
-// - void imprimirStock(): "Stock:" y, por cada codigo de menor a mayor,
-//   un espacio y "codigo=cantidad". Termina la linea.
-// - void imprimirRetiros(): "Retiros:" y cada codigo del historial
-//   precedido de un espacio. Termina la linea.
-// - void imprimirAgotados(): "Agotados alguna vez:" y cada codigo
-//   precedido de un espacio. Termina la linea.
+    public:
+        void ingresar(int codigo, int cantidad) {
+            stock[codigo] += cantidad;
+        }
+
+        bool retirar(int codigo, int cantidad) {
+            if (stock.count(codigo) == 0 || stock[codigo] < cantidad) {
+                return false;
+            }
+            stock[codigo] -= cantidad;
+            retiros.push_back(codigo);
+            if (stock[codigo] == 0) {
+                agotados.insert(codigo);
+            }
+            return true;
+        }
+
+        int stockDe(int codigo) {
+            if (stock.count(codigo) == 0) {
+                return 0;               // no usar stock[codigo]: crearia el 999
+            }
+            return stock[codigo];
+        }
+
+        int cantidadDeProductos() {
+            return stock.size();
+        }
+
+        int retiroNumero(int posicion) {
+            return retiros[posicion];
+        }
+
+        void imprimirStock() {
+            std::cout << "Stock:";
+            for (auto par : stock) {
+                std::cout << " " << par.first << "=" << par.second;
+            }
+            std::cout << std::endl;
+        }
+
+        void imprimirRetiros() {
+            std::cout << "Retiros:";
+            for (int codigo : retiros) {
+                std::cout << " " << codigo;
+            }
+            std::cout << std::endl;
+        }
+
+        void imprimirAgotados() {
+            std::cout << "Agotados alguna vez:";
+            for (int codigo : agotados) {
+                std::cout << " " << codigo;
+            }
+            std::cout << std::endl;
+        }
+};
 
 void informarRetiro(int codigo, int cantidad, bool aceptado) {
     std::cout << "Retirar " << cantidad << " de " << codigo << ": ";

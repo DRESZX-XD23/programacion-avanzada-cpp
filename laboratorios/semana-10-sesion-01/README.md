@@ -12,11 +12,11 @@ Elegir el contenedor de la STL adecuado según el patrón de acceso e inserción
 
 Según el artículo, ¿qué diferencia a un `set` de un `vector` cuando insertas un valor que ya estaba? ¿Y en qué orden quedan los elementos de un `map` al recorrerlo?
 
-_(tu respuesta)_
+en el set los ordena de menor a mayor y solo puede haber un dato de cada uno, el vector los puedes poner tu como quieras y puede haber valores repetidos, el map se ordena igual de menor a mayor y el codigo no puede haber dos del mismo nombre
 
 `Historial` tiene una capacidad fija y rechaza el valor que no cabe. ¿Qué tendría que hacer para crecer cuando se llena?
 
-_(tu respuesta)_
+hay que moverlo a un array nuevo con move, tiene que ser mas grande y despues eliminar el antiguo array
 
 ## Ejercicio 1: Historial sobre un vector
 
@@ -24,21 +24,60 @@ Archivo: [`ejercicio1_historial_vector.cpp`](./ejercicio1_historial_vector.cpp).
 
 **Respuesta 1, antes de ver la solución:** con un `std::vector<int>` y `reserve(3)`, ¿qué capacidad esperas ver después de agregar el cuarto valor? ¿Qué tuvo que pasar con los tres valores que ya estaban guardados?
 
-_(tu respuesta)_
+que de error el codigo 
 
 **Respuesta 2:** en el paso 4, `semana.end()` no apunta al último elemento. ¿A qué apunta, y por qué el loop se detiene con `it != semana.end()` en vez de `it <= semana.end()`?
 
-_(tu respuesta)_
+apunta a la posición que viene justo después del último elemento, donde no hay ningún valor. Se detiene por que o sino estaria leyendo una posicion que no existe.
 
 **La formulación completa, tal como la resuelvo yo:**
 
-_(anota aquí la clase con el vector, la secuencia de capacidades y la salida del paso 4)_
+template <typename T>
+class Historial {
+    private:
+        std::vector<T> valores;
+    public:
+        Historial(int capacidadInicial) {
+            valores.reserve(capacidadInicial);
+        }
+
+        bool agregar(T valor) {
+            valores.push_back(valor);
+            return true;
+        }
+
+        T obtener(int indice) {
+            return valores[indice];
+        }
+
+        T ultimo() {
+            return valores.back();
+        }
+
+        int getUsadas() {
+            return valores.size();
+        }
+
+        int getCapacidad() {
+            return valores.capacity();
+        }
+};
+Agregar 4200: aceptado (usadas 1, capacidad 3)
+Agregar 1800: aceptado (usadas 2, capacidad 3)
+Agregar 3300: aceptado (usadas 3, capacidad 3)
+Agregar 5100: aceptado (usadas 4, capacidad 6)
+Agregar 2700: aceptado (usadas 5, capacidad 6)
+Agregar 3900: aceptado (usadas 6, capacidad 6)
+Ultimo dia: 3900
+Primer dia: 4200
+Semana: 4200 1800 3300 5100 2700 3900 4600
+Total de la semana: 25600
 
 ## Durante el caso comparativo
 
 Una fila de impresión recibe trabajos urgentes al frente y cancela trabajos en cualquier posición. Un registro de lecturas solo agrega al final y se consulta por posición. ¿Qué contenedor usarías para cada uno, y qué operación decide la elección?
 
-_(tu respuesta)_
+Las operaciones que deciden son agregar al frente (push_front) y cancelar en cualquier posición (erase). En una lista, las dos solo reconectan punteros entre nodos, sin mover los demás elementos. En un vector, insertar al inicio o borrar en medio obliga a correr todos los elementos de atrás una posición. Además, vector ni siquiera tiene push_front.
 
 ## Durante los ConcepTests
 
@@ -70,7 +109,11 @@ Completa los métodos de `ColaDeImpresion`, que guarda los trabajos en una `std:
 
 Antes de dar el ejercicio por terminado, responde: en `cancelar`, ¿qué pasaría si después de `trabajos.erase(it)` siguieras el loop con `++it`? ¿Qué operación de esta clase sería más barata con un `std::vector`, y por qué igual conviene la lista para este problema?
 
-_(tu respuesta)_
+erase destruye el nodo donde estaba parado it, así que it queda inválido: apunta a memoria que ya no es parte de la lista. Hacer ++it sobre él es comportamiento indefinido: el programa puede saltarse elementos, imprimir basura o fallar. lo correcto sería it = trabajos.erase(it);, porque erase devuelve un iterador válido al siguiente elemento.
+
+Recorrer la fila (imprimir, y la búsqueda dentro de cancelar) y agregar al final (agregar).
+
+Porque las operaciones que definen el problema son agregar urgentes al frente (push_front), atender al primero (pop_front) y cancelar en cualquier posición (erase)
 
 ## Ejercicio 3: la bodega de componentes
 
@@ -80,15 +123,16 @@ Escribe la clase `Bodega` a partir de la especificación del archivo. La especif
 
 Antes de dar el ejercicio por terminado, responde por cada atributo: ¿qué contenedor elegiste, qué operación de la especificación decidió esa elección, y qué se rompería o se volvería más caro con otro contenedor?
 
-_(stock)_
+Stock → std::map<int, int>.
+La operación que decide es buscar la cantidad por código (ingresar, retirar, stockDe), y además imprimirStock pide los códigos de menor a mayor.
+Historial de retiros → std::vector<int>.
+Las operaciones que deciden son agregar al final en el orden en que ocurren (push_back), permitir repetidos (el 120 aparece tres veces) y consultar por posición (retiroNumero(2) usa []).
 
-_(historial de retiros)_
-
-_(agotados)_
+La especificación pide sin repetir y ordenados de menor a mayor, y el set hace las dos cosas automáticamente con insert.
 
 Responde también: ¿por qué `stockDe(999)` no puede escribirse como `return stock[999];` si `stock` es un `map`? ¿Qué línea de la salida esperada lo delataría?
 
-_(tu respuesta)_
+Porque en un map, el operador [] crea la clave si no existe, con valor 0. Leer stock[999] agregaría el código 999 al stock aunque nunca se ingresó, y la especificación dice que stockDe no debe registrar el código.
 
 ## Compilar y ejecutar
 
@@ -109,4 +153,6 @@ Los contenedores `std::vector<T>` (`push_back`, `size`, `[]`, `back`, `reserve`,
 
 Hoy recorriste un `vector` y una `list` con el mismo patrón de iterador. Si mañana necesitas sumar, buscar el máximo y contar valores en los dos contenedores, ¿cuántas funciones escribirías con lo que sabes hoy? ¿Qué tendría que recibir una sola función para servir a los dos?
 
-_(tu respuesta)_
+sumar, buscar el máximo y contar, cada una dos veces, una para std::vector y otra para std::list. El código de cada pareja sería casi idéntico, porque los dos se recorren con el mismo patrón de iterador (begin(), end(), *it, ++it). Solo cambiaría el tipo del parámetro.
+
+En vez de recibir el contenedor, tendría que recibir dos iteradores: uno al inicio y otro al final del rango (begin() y end()).

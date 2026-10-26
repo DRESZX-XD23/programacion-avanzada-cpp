@@ -1,6 +1,6 @@
 #include <iostream>
 #include <memory>
-
+#include <vector> 
 // Historial<T> de la sesion pasada: capacidad fija, y rechaza el valor
 // que ya no cabe.
 
@@ -9,26 +9,22 @@ class Historial {
     private:
         // TODO (paso 1): reemplaza estos tres atributos por un solo
         // std::vector<T> llamado valores. Incluye <vector> arriba.
-        std::unique_ptr<T[]> valores;
-        int capacidad;
-        int usadas;
+        //std::unique_ptr<T[]> valores;
+        //int capacidad;
+        //int usadas;
+         std::vector<T> valores;
     public:
         Historial(int capacidadInicial) {
             // TODO (paso 1): con el vector, reserva espacio para
             // capacidadInicial elementos con valores.reserve(...).
-            capacidad = capacidadInicial;
-            usadas = 0;
-            valores = std::make_unique<T[]>(capacidad);
+           
+            valores.reserve(capacidadInicial);
         }
 
         bool agregar(T valor) {
             // TODO (paso 2): con push_back el historial ya no se llena.
             // Agrega el valor y devuelve true siempre.
-            if (usadas >= capacidad) {
-                return false;
-            }
-            valores[usadas] = valor;
-            usadas = usadas + 1;
+            valores.push_back(valor);
             return true;
         }
 
@@ -38,18 +34,18 @@ class Historial {
 
         T ultimo() {
             // TODO (paso 2): el ultimo elemento del vector.
-            return valores[usadas - 1];
+            return valores.back();
         }
 
         int getUsadas() {
             // TODO (paso 2): cuantos elementos tiene el vector.
-            return usadas;
+            return valores.size();
         }
 
         int getCapacidad() {
             // TODO (paso 3): cuantos elementos caben sin reservar memoria
             // nueva.
-            return capacidad;
+            return valores.capacity();
         }
 };
 
@@ -77,5 +73,30 @@ int main() {
     // b) Suma los valores con un for de rango e imprime
     //    "Total de la semana: " con el resultado.
 
+
+
+
+
+
+    std::vector<int> datos_semanales= {4200,1800,3300,5100,2700,3900,4600};
+
+// recorrer
+//auto: que dato es?
+//it es puntero, asi que lo puedo mover donde quiera
+std::cout<<"Semana:";    
+for(auto it = datos_semanales.begin(); it != datos_semanales.end();++it){
+        std::cout<< " "<< *it;
+
+    }
+    std::cout<<std::endl;
+
+    //datos_semanales.begin() //puntero al inicio    
+
+
+    int total=0;
+    //valor va a coger los datos uno en uno
+    for (int valor: datos_semanales){
+    total+=valor; }
+   std::cout<<"total de la semana: "<<total<<std::endl;
     return 0;
 }
