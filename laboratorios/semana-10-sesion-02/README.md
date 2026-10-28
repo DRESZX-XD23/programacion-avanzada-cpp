@@ -12,11 +12,19 @@ Resolver problemas usando algoritmos de la biblioteca STL en lugar de loops manu
 
 Según el artículo, ¿qué reciben como argumento los algoritmos de `<algorithm>`: el contenedor, o otra cosa? ¿Qué devuelve `std::find` cuando no encuentra el valor?
 
-_(tu respuesta)_
+reciben en un rango de inico hasta el final.
+ Cuando `std::find` no encuentra el valor, devuelve el iterador final del
+rango (`v.end()`), que no apunta a ningún elemento.
+
 
 Si necesitas sumar, buscar el máximo y contar valores en un `vector` y en una `list`, ¿cuántas funciones escribirías con lo que sabías la sesión pasada? ¿Qué tendría que recibir una sola función para servir a los dos?
 
-_(tu respuesta)_
+
+Escribiría 6 funciones (sumar, máximo y contar, una para `vector` y otra
+para `list`).
+
+ Para que una sola sirva a los dos, debería ser una plantilla
+que reciba dos iteradores (inicio y fin)
 
 ## Ejercicio 1: de loops a algoritmos
 
@@ -24,21 +32,62 @@ Archivo: [`ejercicio1_lecturas_algoritmos.cpp`](./ejercicio1_lecturas_algoritmos
 
 **Respuesta 1, antes de ver la solución:** `std::max_element` no devuelve un `double`. ¿Qué devuelve, y por qué esa es la decisión correcta si el vector pudiera estar vacío?
 
-_(tu respuesta)_
+Devuelve un iterador que apunta al elemento máximo. si el vector está vacío, no existe ningún máximo
+que devolver como `double`
 
 **Respuesta 2:** en el paso 5, las mismas llamadas pasan a recibir `lista.begin()` y `lista.end()`. ¿Compilan sin cambios? ¿Qué tiene que saber hacer el iterador de una lista para que `std::count` funcione?
 
-_(tu respuesta)_
+Sí, compilan sin cambios. Para que `std::count` funcione, el iterador de la
+lista solo tiene que saber avanzar al siguiente elemento
 
 **Respuesta 3:** en el paso 6, `std::accumulate` recibe `0` en vez de `0.0`. ¿Qué número esperas que imprima?
 
-_(tu respuesta)_
+un entero, y cada vez se va perdiendo exactitud
 
 **La formulación completa, tal como la resuelvo yo:**
 
-_(anota aquí cada llamada, lo que imprimió la lista y la suma con 0)_
 
-## Durante los ConcepTests
+double sumaTotal = std::accumulate(temperaturas.begin(), temperaturas.end(), 0.0);
+
+
+auto itMaximo = std::max_element(temperaturas.begin(), temperaturas.end());
+
+
+int vecesEn23 = std::count(temperaturas.begin(), temperaturas.end(), 23.0);
+
+
+auto itPosicion = std::find(temperaturas.begin(), temperaturas.end(), 25.5);
+
+std::list<double> lista(temperaturas.begin(), temperaturas.end());
+double sumaLista = std::accumulate(lista.begin(), lista.end(), 0.0);
+auto itMaxLista = std::max_element(lista.begin(), lista.end());
+int veces23Lista = std::count(lista.begin(), lista.end(), 23.0);
+
+
+int sumaConCero = std::accumulate(temperaturas.begin(), temperaturas.end(), 0);
+
+Salida:
+
+suma acumulada: 153
+Valor maximo: 25.5
+Veces que dio 23: 2
+Se encontro el 25.5 en la posicion: 4
+Suma (lista): 153
+Maxima (lista): 25.5
+Dias en 23.0 (lista): 2
+Suma con 0 como valor inicial: 151
+
+
+
+
+
+
+
+
+
+
+
+    ## Durante los ConcepTests
 
 **ConcepTest 1. Tu voto, antes de discutir en pareja** (A, B, C o D):
 
@@ -68,7 +117,10 @@ Escribe la función `esDiaSedentario` y resuelve cada `TODO` del `main` con `std
 
 Antes de dar el ejercicio por terminado, responde: ¿qué error da el compilador si la lambda de la meta no escribe `[meta]`? ¿Por qué el ejercicio ordena una copia y no el vector `pasos`?
 
-_(tu respuesta)_
+ el error meta is not captured: la lambda está dentro del main pero no puede usar una variable local de afuera si no la captura entre corchetes.
+da error por que esa lamda esta afuera del main y no sabe que variable coger.
+e ordena una copia porque sort modifica el vector que recibe. Si
+ordenara pasos, se perdería el orden original
 
 ## Ejercicio 3: las ventas de la tienda
 
@@ -78,12 +130,13 @@ Responde las cuatro preguntas del `main` sobre un `std::vector<Venta>` con algor
 
 Antes de dar el ejercicio por terminado, responde: si `ventas` fuera una `std::list<Venta>`, ¿cuál de tus llamadas deja de compilar? ¿Con qué la reemplazarías?
 
-_(tu respuesta)_
+Deja de compilar std::sort, porque necesita iteradores de acceso
+aleatorio 
 
+reemplazo ventas.sort([](Venta a, Venta b) { return a.getTotal() > b.getTotal(); });
 Responde también: ¿qué imprime "Total recaudado" si el valor inicial de tu suma es `0` en vez de `0.0`? Pruébalo.
 
-_(tu respuesta)_
-
+imprime 146, la primera venta (2.5) se guarda como 2 y se pierde el 0.5
 ## Compilar y ejecutar
 
 ```
@@ -103,4 +156,5 @@ Los algoritmos `std::accumulate` (de `<numeric>`, con y sin operación propia), 
 
 La `Bodega` de la sesión pasada devuelve `false` cuando no puede retirar, y `*std::max_element(v.begin(), v.end())` con un vector vacío lee una posición que no existe. ¿Cómo se entera hoy quien llama a esas funciones de que algo salió mal? ¿Qué pasa si no revisa el valor devuelto?
 
-_(tu respuesta)_
+Solo se entera si revisa el valor devuelto false o v.end(). Si no lo
+revisa, el error no salta
