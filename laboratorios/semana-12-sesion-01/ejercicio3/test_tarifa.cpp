@@ -22,3 +22,53 @@
 //
 //     g++ -std=c++20 -Wall -Wextra -g -I ejercicio3/version_a ejercicio3/test_tarifa.cpp -lgtest_main -lgtest -pthread -o bin/test_tarifa_a
 //     ./bin/test_tarifa_a
+
+TEST(Tarifa, MinutosNegativosLanza) {
+    EXPECT_THROW(tarifaEnCentavos(-1), std::invalid_argument);
+}
+
+// --- Tramo gratis: 0 a 15 inclusive ---
+TEST(Tarifa, CeroMinutosNoCobra) {
+    EXPECT_EQ(tarifaEnCentavos(0), 0);
+}
+
+TEST(Tarifa, QuinceMinutosNoCobra) {
+    EXPECT_EQ(tarifaEnCentavos(15), 0);
+}
+
+TEST(Tarifa, DieciseisMinutosCobraUnaHora) {
+    EXPECT_EQ(tarifaEnCentavos(16), 50);
+}
+
+TEST(Tarifa, SesentaMinutosCobraUnaHora) {
+    EXPECT_EQ(tarifaEnCentavos(60), 50);
+}
+
+TEST(Tarifa, SesentaYUnMinutosCobraDosHoras) {
+    EXPECT_EQ(tarifaEnCentavos(61), 100);
+}
+
+TEST(Tarifa, CientoVeinteMinutosCobraDosHoras) {
+    EXPECT_EQ(tarifaEnCentavos(120), 100);
+}
+
+TEST(Tarifa, CientoVeintiunMinutosCobraTresHoras) {
+    EXPECT_EQ(tarifaEnCentavos(121), 150);
+}
+
+
+TEST(Tarifa, NueveHorasYUnMinutoLlegaAlTope) {
+    EXPECT_EQ(tarifaEnCentavos(541), 500);
+}
+
+TEST(Tarifa, DiezHorasCobraElTope) {
+    EXPECT_EQ(tarifaEnCentavos(600), 500);
+}
+
+TEST(Tarifa, DiezHorasYUnMinutoNoPasaDelTope) {
+    EXPECT_EQ(tarifaEnCentavos(601), 500);
+}
+
+TEST(Tarifa, EstadiaMuyLargaNoPasaDelTope) {
+    EXPECT_EQ(tarifaEnCentavos(10000), 500);
+}
