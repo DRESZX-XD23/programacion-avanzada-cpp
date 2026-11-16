@@ -18,8 +18,9 @@
 
 class ContadorDeVisitas {
     private:
-        int total;
-        // TODO 2: un std::mutex que proteja total.
+   
+    int total;
+    std::mutex candado;    // TODO 2: un std::mutex que proteja total.
     public:
         ContadorDeVisitas() {
             total = 0;
@@ -27,7 +28,7 @@ class ContadorDeVisitas {
 
         void registrar() {
             // TODO 2: antes de tocar total, toma el candado con
-            // std::lock_guard<std::mutex> guardia(candado);
+         std::lock_guard<std::mutex> guardia(candado);
             total = total + 1;
         }
 
@@ -48,9 +49,13 @@ int main() {
     // TODO 1: reemplaza las dos llamadas por dos std::thread que ejecuten
     // puerta(&contador, 1000000) al mismo tiempo, y espera a que terminen
     // los dos con join() antes de imprimir.
-    puerta(&contador, 1000000);
-    puerta(&contador, 1000000);
 
+    //thread hace que se ejecuten al mismo tiempo y join 
+    std::thread puertaNorte(puerta, &contador, 1000000);
+    std::thread puertaSur(puerta, &contador, 1000000);
+
+    puertaNorte.join();
+    puertaSur.join();
     std::cout << "Visitas registradas: " << contador.getTotal() << std::endl;
     return 0;
 }

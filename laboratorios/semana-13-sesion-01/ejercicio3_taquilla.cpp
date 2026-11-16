@@ -2,7 +2,7 @@
 #include <mutex>
 #include <thread>
 #include <vector>
-
+using namespace std;
 // Ejercicio 3: la taquilla del concierto de fin de semestre.
 //
 // El teatro tiene 20000 asientos, numerados del 0 al 19999. Cuatro vendedores
@@ -41,7 +41,89 @@
 
 // TODO: escribe aqui la clase Taquilla.
 
+class Taquilla{ 
+private:
+std::mutex candado;     
+
+std::vector<int> ocupante;
+public:
+
+Taquilla(int asientos) : ocupante(asientos, 0) {}
+
+// - bool reservar(int asiento, int comprador): si el asiento no existe o
+//   ya tiene dueno, devuelve false. Si no, lo deja a nombre del comprador
+//   y devuelve true.
+bool reservar(int asiento, int comprador){
+    std::lock_guard<std::mutex> guardia(candado);
+    if( asiento < 0 or asiento >= (int)ocupante.size() or ocupante[asiento] != 0    ){return false;}else{
+        ocupante[asiento]=comprador;
+        return true;
+     }
+}
+
+
+
+bool reservarPar(int a, int b, int comprador){
+    std::lock_guard<std::mutex> guardia(candado);
+if(a < 0 or a >= (int)ocupante.size() or ocupante[a] != 0 or
+   b < 0 or b >= (int)ocupante.size() or ocupante[b] != 0  )
+{return false;}else{
+
+    ocupante[a]=comprador;
+    ocupante[b]=comprador;
+    return true;
+}
+
+ }
+
+
+
+// reserva los dos
+//   asientos a nombre del comprador solo si los dos existen y estan
+//   libres; si no, no reserva ninguno y devuelve false.
+
+
+
+
+
+
+int duenoDe(int asiento){
+
+std::lock_guard<std::mutex> guardia(candado);
+    if (asiento < 0 or asiento >= (int)ocupante.size()) {
+        return 0;
+    }
+    return ocupante[asiento];
+}
+
+
+
+
+// - int duenoDe(int asiento): el comprador del asiento, o 0 si esta
+//   libre (los compradores van del 1 en adelante).
+// - int vendidos(): cuantos asientos tienen dueno.
+
+int vendidos(){
+std::lock_guard<std::mutex> guardia(candado); 
+int cont=0;
+for(int i=0;i<(int)ocupante.size();i++){
+
+if(ocupante[i]>0){
+    cont=cont+1;
+}
+}
+return cont;
+}
+
+
+
+
+};
+
+
+
 void vendedor(Taquilla* taquilla, int comprador, int* logradas) {
+  
     for (int asiento = 0; asiento < 20000; asiento++) {
         if (taquilla->reservar(asiento, comprador)) {
             *logradas = *logradas + 1;
@@ -56,7 +138,7 @@ void vendedorDePares(Taquilla* taquilla, int comprador, int* logradas) {
         }
     }
 }
-
+ 
 int main() {
     Taquilla taquilla(20000);
     int logradas[5] = {0, 0, 0, 0, 0};
