@@ -3,7 +3,7 @@
 #include <map>
 #include <mutex>
 #include <thread>
-
+using namespace std;
 // Ejercicio 3: el centro de impresion de la biblioteca.
 //
 // Cuatro computadoras envian trabajos de impresion al mismo tiempo, cada
@@ -11,7 +11,47 @@
 //
 // TODO: escribe la clase CentroDeImpresion. Para cada dato, decide si va
 // en un std::atomic o protegido por un std::mutex, y justificalo en el
-// README:
+
+class CentroDeImpresion{
+private:
+    std::atomic<bool> cerrado{false};
+    std::atomic<int> aceptados{0};
+    std::atomic<int> rechazados{0};
+    std::atomic<int> total{0};
+
+    std::map<int, int> paginasPorEstudiante;
+    std::mutex m;
+public:
+
+void cerrar() { cerrado = true; }
+bool estaCerrado() { return cerrado; }
+
+ bool enviar(int estudiante, int paginas){
+if (cerrado==true or paginas <=0){return false;}
+std::lock_guard<std::mutex> lock(m);
+if(paginasPorEstudiante[estudiante] +paginas >100){rechazados++;return false;}
+paginasPorEstudiante[estudiante] += paginas;   
+aceptados++;                          
+total += paginas;                             
+return true;                                
+
+ }
+
+int trabajosAceptados()  { return aceptados; }
+int rechazadosPorCuota() { return rechazados; }
+int paginasTotales()     { return total; }
+
+int paginasDe(int estudiante) {
+    std::lock_guard<std::mutex> lock(m);
+    return paginasPorEstudiante[estudiante];
+}
+
+
+
+};
+
+
+
 //
 // - bool enviar(int estudiante, int paginas): si el centro esta cerrado,
 //   o paginas no es positivo, devuelve false. Si con este trabajo el
@@ -25,6 +65,15 @@
 // - int paginasDe(int estudiante): las paginas aceptadas de ese estudiante,
 //   o 0 si no tiene ninguna.
 //
+
+
+
+
+
+
+
+
+
 // No cambies el main: cada computadora envia, para cada estudiante del 1
 // al 50, 10 trabajos de 5 paginas, y al final se verifica que las cuentas
 // cuadren.
