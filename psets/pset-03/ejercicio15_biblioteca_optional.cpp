@@ -1,20 +1,4 @@
 // Ejercicio 15: Biblioteca (std::optional)
-//
-// Completa los metodos marcados con TODO. Ninguno devuelve -1 ni 0 para
-// decir "no hay": cuando no hay respuesta, devuelven std::nullopt. No
-// cambies las firmas ni el main().
-//
-// Compilar: g++ -std=c++20 -Wall -Wextra -g -o ejercicio15 ejercicio15_biblioteca_optional.cpp
-// Ejecutar: ./ejercicio15
-//
-// Salida esperada:
-// Anio del libro 5521: 1967
-// Anio del libro 9999: desconocido
-// Mas antiguo: 1605
-// Prestar 5521: devolver el dia 14
-// Prestar 5521 otra vez: no disponible
-// Prestar 9999: no disponible
-// Biblioteca vacia, mas antiguo: 0
 
 #include <iostream>
 #include <map>
@@ -30,19 +14,30 @@ public:
         anioPorCodigo[codigo] = anio;
     }
     std::optional<int> anioDe(int codigo) {
-        // TODO: si el codigo no esta, devuelve std::nullopt; si esta, su anio.
-        return std::nullopt;
+        auto it = anioPorCodigo.find(codigo);
+        if (it == anioPorCodigo.end()) {
+            return std::nullopt;             
+        }
+        return it->second;                   
     }
     std::optional<int> masAntiguo() {
-        // TODO: devuelve el anio mas antiguo de todos los libros, o std::nullopt
-        // si no hay libros.
-        return std::nullopt;
+        if (anioPorCodigo.empty()) {
+            return std::nullopt;
+        }
+        int menor = anioPorCodigo.begin()->second; 
+        for (auto it = anioPorCodigo.begin(); it != anioPorCodigo.end(); it++) {
+            if (it->second < menor) {
+                menor = it->second;
+            }
+        }
+        return menor;
     }
     std::optional<int> prestar(int codigo, int hoy) {
-        // TODO: si el libro no existe o ya esta prestado, devuelve std::nullopt.
-        // Si no, lo marca como prestado y devuelve el dia de devolucion,
-        // hoy + 7.
-        return std::nullopt;
+        if (anioPorCodigo.count(codigo) == 0 || prestados.count(codigo) == 1) {
+            return std::nullopt;             
+        }
+        prestados.insert(codigo);
+        return hoy + 7;
     }
 };
 

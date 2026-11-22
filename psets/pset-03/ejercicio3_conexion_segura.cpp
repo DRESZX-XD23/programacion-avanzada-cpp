@@ -19,11 +19,13 @@
 #include <iostream>
 #include <memory>
 
+using namespace std;
+
 class Conexion {
 public:
     // TODO: la base se usa a traves de un unique_ptr<Conexion>: agrega lo que le
     // falta a este destructor para que tambien se ejecute el de la derivada.
-    ~Conexion() {
+    virtual ~Conexion() {
         std::cout << "Conexion cerrada" << std::endl;
     }
     virtual int puerto() {
@@ -40,18 +42,34 @@ private:
 public:
     ConexionSegura(int bits) {
         // TODO: reserva con new un int, guardalo en certificado y asignale bits.
-        certificado = nullptr;
+        certificado = new int(bits);
+    
     }
     ~ConexionSegura() {
-        // TODO: libera certificado con delete e imprime "Certificado liberado".
+     std::cout<<"Certificado liberado"<<endl;
+       delete certificado; // TODO: libera certificado con delete e imprime "Certificado liberado".
     }
     int puerto() override {
         return 443;
     }
+
+
+
+
+    
     int bitsDeCertificado() override {
         // TODO: devuelve el valor al que apunta certificado.
-        return 0;
+        return *certificado;
     }
+
+
+
+
+
+
+
+
+
 };
 
 int main() {

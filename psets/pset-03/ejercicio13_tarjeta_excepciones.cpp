@@ -1,20 +1,4 @@
 // Ejercicio 13: TarjetaDeTransporte (lanzar excepciones)
-//
-// Completa los metodos marcados con TODO: cada uno lanza la excepcion de
-// <stdexcept> que se indica, con el mensaje exacto. El main ya atrapa
-// cada una; no lo cambies.
-//
-// Compilar: g++ -std=c++20 -Wall -Wextra -g -o ejercicio13 ejercicio13_tarjeta_excepciones.cpp
-// Ejecutar: ./ejercicio13
-//
-// Salida esperada:
-// Saldo: 5
-// Pago aceptado, saldo: 4.55
-// Error de dato: monto no positivo
-// Error de operacion: saldo insuficiente
-// Saldo sin cambios: 4.55
-// Error de dato: tarifa no positiva
-// Fin
 
 #include <iostream>
 #include <stdexcept>
@@ -27,13 +11,19 @@ public:
         saldo = 0;
     }
     void recargar(double monto) {
-        // TODO: si monto <= 0, lanza std::invalid_argument("monto no positivo").
-        // Si no, suma monto al saldo.
+        if (monto <= 0) {
+            throw std::invalid_argument("monto no positivo");
+        }
+        saldo += monto;
     }
     void pagar(double tarifa) {
-        // TODO: si tarifa <= 0, lanza std::invalid_argument("tarifa no positiva").
-        // Si tarifa > saldo, lanza std::runtime_error("saldo insuficiente")
-        // sin cambiar el saldo. Si no, resta la tarifa.
+        if (tarifa <= 0) {
+            throw std::invalid_argument("tarifa no positiva");
+        }
+        if (tarifa > saldo) {
+            throw std::runtime_error("saldo insuficiente");
+        }
+        saldo -= tarifa;          
     }
     double getSaldo() {
         return saldo;

@@ -23,10 +23,12 @@ private:
     T fin;
 public:
     Intervalo(T a, T b) {
+        T menor=a;
+        T mayor=b;
+       if(a<=b){menor=a;mayor=b;}else{menor=b;mayor=a;}
+       inicio=menor;fin=mayor;
         // TODO: guarda el menor de a y b en inicio y el mayor en fin, en ese orden,
         // aunque quien llama los pase al reves.
-        inicio = a;
-        fin = b;
     }
     T getInicio() {
         return inicio;
@@ -36,16 +38,17 @@ public:
     }
     T ancho() {
         // TODO: devuelve fin - inicio.
-        return inicio;
+        return fin-inicio;
     }
     bool contiene(T valor) {
+        if(valor<=fin and valor >=inicio){return true;}else
+        
+        
         // TODO: true si valor esta entre inicio y fin, ambos incluidos.
         return false;
     }
     bool seCruzaCon(Intervalo<T> otro) {
-        // TODO: true si los dos intervalos comparten al menos un valor: inicio de
-        // cada uno menor o igual que el fin del otro.
-        return false;
+        return inicio <= otro.getFin() && otro.getInicio() <= fin;
     }
 };
 

@@ -27,7 +27,7 @@ public:
     }
 };
 
-class Guitarra : public Instrumento {
+class Guitarra :  public Instrumento {
 private:
     int cuerdas;
 public:
@@ -36,20 +36,24 @@ public:
     }
     int notasPorMinuto() override {
         // TODO: devuelve cuerdas * 20.
-        return 0;
+        return cuerdas*20;
     }
     int volumen() {
         return 8;
     }
 };
 
-class Bateria : public Instrumento {
+class Bateria :  public Instrumento {
 private:
     int tambores;
 public:
     Bateria(int t) {
         tambores = t;
     }
+    int notasPorMinuto() override {
+        return tambores * 30;
+    }
+    
     // TODO: escribe aqui notasPorMinuto, sobrescrito con override: devuelve
     // tambores * 30.
 };
