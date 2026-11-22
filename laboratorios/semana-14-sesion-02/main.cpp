@@ -6,7 +6,7 @@
 
 // Laboratorio Integrador II: un dia de la cafeteria. No cambies este main:
 // al final verifica que no se perdio ni se duplico ningun pedido, y que el
-// inventario cuadra.
+// inventario cuadra
 
 const int CAJAS = 3;
 const int PEDIDOS_POR_CAJA = 20000;

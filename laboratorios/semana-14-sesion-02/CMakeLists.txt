@@ -6,15 +6,22 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(CON_SANITIZERS "Compilar con AddressSanitizer y UBSan" OFF)
+
+
+option(CON_TSAN "Compilar con ThreadSanitizer" OFF)
+if(CON_SANITIZERS AND CON_TSAN)
+    message(FATAL_ERROR "CON_SANITIZERS y CON_TSAN no se pueden usar a la vez")
+endif()
+
 if(CON_SANITIZERS)
     add_compile_options(-fsanitize=address,undefined -fno-omit-frame-pointer)
     add_link_options(-fsanitize=address,undefined)
 endif()
 
-# TODO 6: una opcion CON_TSAN, apagada por defecto, que compile y enlace
-# todo con -fsanitize=thread (como CON_SANITIZERS, en la Semana 12). Las dos
-# opciones no se usan a la vez: ThreadSanitizer no se combina con
-# AddressSanitizer.
+if(CON_TSAN)
+    add_compile_options(-fsanitize=thread -g)
+    add_link_options(-fsanitize=thread)
+endif()
 
 add_executable(cafeteria main.cpp)
 target_compile_options(cafeteria PRIVATE -Wall -Wextra)

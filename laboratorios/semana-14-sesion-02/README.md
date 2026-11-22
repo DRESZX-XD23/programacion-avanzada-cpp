@@ -50,7 +50,7 @@ ctest --test-dir build --output-on-failure
 
 Antes de cambiar nada, corre el programa tres veces. Lo más probable es que termine con un error de memoria (`Segmentation fault` o `malloc(): ...`), o que no cuadre. ¿Por qué un programa que nunca usa `new` ni `delete` puede romper la memoria?
 
-_(tu respuesta)_
+Porque std::vector sí usa memoria dinámica por dentro. Cuando push_back llena la capacidad, el vector pide un bloque más grande, copia los elementos y libera el bloque viejo. Si dos cajas hacen push_back a la vez sin candado, una puede escribir en el bloque que la otra acaba de liberar, o las dos pueden liberar el mismo bloque.
 
 Cuando tengas el `TODO 6`, compila en otra carpeta con ThreadSanitizer:
 
@@ -84,9 +84,16 @@ Y `ctest`: las 7 pruebas pasan, también en `build-tsan`, sin ningún reporte de
 
 ## Para pensar mientras completas `Estadisticas`
 
-`Estadisticas` usa atomics y no un mutex. `Inventario` usa un mutex y no atomics. ¿Por qué no al revés? ¿Qué tendría que pasar con `descontar` para que un `std::atomic<int>` por producto alcanzara?
+Estadisticas usa atomics y no un mutex. Inventario usa un mutex y no atomics. ¿Por qué no al revés? ¿Qué tendría que pasar con descontar para que un std::atomic<int> por producto alcanzara?
 
-_(tu respuesta)_
+Estadisticas usa atomics porque cada anotación es una sola operación sobre un
+número (++), y un atomic la hace indivisible sin necesidad de mutex.
+Inventario necesita un mutex porque descontar tiene dos pasos que deben ir
+juntos: revisar si alcanza y restar. 
+
+Para que bastara un std::atomic<int> por producto, revisar y restar tendrían
+que ser una sola operación atómica
+
 
 ## Después: tu Proyecto Final
 
@@ -94,14 +101,22 @@ Con el tiempo que quede, trabaja en tu PSet 5. Antes de irte, anota:
 
 **¿Qué parte de tu proyecto corre en más de un hilo, y qué la protege?**
 
-_(tu respuesta)_
+Las tres cajas
+agregan pedidos a la vez y los dos cocineros toman pedidos y descuentan del
+inventario a la vez. La cola y el inventario los protege un `std::mutex` con
+`lock_guard`
 
 **¿Qué prueba de tu proyecto mostraría el problema si quitaras esa protección? ¿Fallaría siempre, o necesitas ThreadSanitizer para verlo?**
 
-_(tu respuesta)_
-
+dos hilos descuentan 1 unidad 1000 veces cada uno de
+un producto con 1000, y al final deben quedar 0 y haberse vendido 1000. Sin el
+candado no falla siempre: la carrera depende de cómo se intercalen los hilos y
+muchas veces la prueba pasa por suerte. 
+Lo comprobé: sin el candado la prueba pasó, pero ThreadSanitizer reportó el
+data race.
 ## Antes de la próxima sesión
 
 La próxima sesión es de Tópicos Avanzados: un repaso de todo el curso guiado por tus preguntas, sin lectura nueva. Trae por escrito dos preguntas: una sobre un tema del curso que todavía no te cierra, y una sobre algo de C++ que el curso no vio y te gustaría entender.
 
-_(tus dos preguntas)_
+sobre el uso de los punteros, como se diferencian en contraste con un int o un double.
+reforzar mas el uso de arrays 

@@ -7,12 +7,7 @@
 #include <stdexcept>
 #include <vector>
 
-// Laboratorio Integrador II: los pedidos de la cafeteria del campus.
-//
-// Tres cajas toman pedidos al mismo tiempo y los dejan en una cola. Despues,
-// dos cocineros sacan pedidos de la cola al mismo tiempo, descuentan los
-// productos del inventario y anotan el resultado en las estadisticas.
-// Cada clase de este archivo la usan varios hilos a la vez.
+
 
 struct Pedido {
     int id;
@@ -28,17 +23,13 @@ public:
 
     // Deja un pedido al final de la cola.
     void agregar(Pedido pedido) {
-        // TODO 1: la cola la usan tres cajas a la vez. Protege el push_back
-        // con el candado de la clase.
+        // TODO 1: el candado protege el push_back de las tres cajas.
+        std::lock_guard<std::mutex> guardia(candado);
         pedidos.push_back(pedido);
     }
 
-    // Saca el pedido mas antiguo que no se haya sacado todavia, o
-    // std::nullopt si ya no quedan.
     std::optional<Pedido> tomar() {
-        // TODO 2: dos cocineros toman a la vez. Mirar si quedan pedidos y
-        // avanzar siguiente tienen que pasar juntos, sin que otro hilo
-        // se meta en medio.
+        std::lock_guard<std::mutex> guardia(candado);
         int total = pedidos.size();
         if (siguiente >= total) {
             return std::nullopt;
@@ -69,19 +60,29 @@ public:
         stock[producto] = unidades;
     }
 
-    // Descuenta la cantidad del producto si alcanza, y devuelve true. Si no
-    // alcanza, no descuenta nada y devuelve false. Lanza
-    // std::invalid_argument si el producto no existe o si la cantidad no es
-    // positiva.
     bool descontar(int producto, int cantidad) {
-        // TODO 3: escribe descontar. Dos cocineros pueden descontar el mismo
-        // producto a la vez: preguntar si alcanza y restar son una sola
-        // seccion critica. Si lanzas una excepcion con el candado tomado,
-        // ¿quien lo suelta?
-        return false;
+        // TODO 3: todo el metodo es una sola seccion critica. Si se lanza
+        // una excepcion, el destructor de guardia suelta el candado (RAII).
+        std::lock_guard<std::mutex> guardia(candado);
+
+        if (cantidad <= 0) {
+            throw std::invalid_argument("la cantidad debe ser positiva");
+        }
+
+        auto it = stock.find(producto);
+        if (it == stock.end()) {
+            throw std::invalid_argument("producto desconocido");
+        }
+
+        if (it->second < cantidad) {
+            return false;   // no alcanza: no se toca nada
+        }
+
+        it->second -= cantidad;
+        return true;
     }
 
-    // Unidades que quedan del producto (0 si no existe).
+    
     int unidades(int producto) {
         std::lock_guard<std::mutex> guardia(candado);
         if (stock.count(producto) == 0) {
@@ -98,7 +99,10 @@ private:
 class Estadisticas {
 public:
     Estadisticas() {
-        // TODO 4: los tres contadores empiezan en 0.
+       
+        despachados = 0;
+        sinStock = 0;
+        invalidos = 0;
     }
 
     void anotarDespachado() {
@@ -126,10 +130,8 @@ public:
     }
 
 private:
-    // TODO 4: los dos cocineros anotan a la vez, y cada anotacion es una
-    // sola operacion sobre un numero: cambia el tipo de los tres contadores
-    // para que no se pierda ninguna.
-    int despachados;
-    int sinStock;
-    int invalidos;
+   
+    std::atomic<int> despachados;
+    std::atomic<int> sinStock;
+    std::atomic<int> invalidos;
 };
