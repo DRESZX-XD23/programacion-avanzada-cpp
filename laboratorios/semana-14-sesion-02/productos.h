@@ -44,9 +44,10 @@ public:
     }
 
     double precio() override {
-        // TODO 1: una bebida grande cuesta una vez y media su precio base;
-        // una chica, su precio base.
-        return 0;
+        if (grande) {
+            return precioBase * 1.5;
+        }
+        return precioBase;
     }
 
 private:
@@ -78,18 +79,18 @@ private:
 // 10% de descuento.
 class Combo : public Producto {
 public:
-    Combo(int codigo, Bebida nuevaBebida, Plato nuevoPlato) {
+    Combo(int codigo, Bebida nuevaBebida, Plato nuevoPlato)
+        : bebida(nuevaBebida), plato(nuevoPlato) {
         setCodigo(codigo);
-        // TODO 1: el combo tiene su bebida y su plato por composicion.
-        // Declara los dos atributos y guardalos aqui.
     }
 
     double precio() override {
-        // TODO 1: la suma de los precios de la bebida y el plato, con un 10%
-        // de descuento. Delega en el precio de cada uno: no repitas sus
-        // calculos.
-        return 0;
+        return (bebida.precio() + plato.precio()) * 0.9;
     }
+
+private:
+    Bebida bebida;
+    Plato plato;
 };
 
 class Catalogo {
@@ -98,17 +99,23 @@ public:
     // si su precio es menor o igual a 0, y std::invalid_argument("codigo
     // repetido") si ya hay uno con el mismo codigo. Si lanza, no agrega nada.
     void agregar(std::unique_ptr<Producto> producto) {
-        // TODO 2: valida antes de guardar, con los dos mensajes de arriba.
-        // Un producto rechazado no puede quedar en el catalogo.
+        if (producto->precio() <= 0) {
+            throw std::invalid_argument("precio no positivo");
+        }
         int codigo = producto->getCodigo();
+        if (productos.count(codigo) > 0) {
+            throw std::invalid_argument("codigo repetido");
+        }
         productos[codigo] = std::move(producto);
     }
 
     // El precio del producto con ese codigo, o vacio si no esta.
     std::optional<double> precioDe(int codigo) {
-        // TODO 2: sin crear una clave que no existia. El precio lo calcula
-        // cada producto: llamalo a traves de la base.
-        return std::nullopt;
+        auto it = productos.find(codigo);
+        if (it == productos.end()) {
+            return std::nullopt;
+        }
+        return it->second->precio();
     }
 
     int cantidad() {
