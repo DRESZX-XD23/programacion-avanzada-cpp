@@ -6,9 +6,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(CON_SANITIZERS "Compilar con AddressSanitizer y UBSan" OFF)
-
-
 option(CON_TSAN "Compilar con ThreadSanitizer" OFF)
+
 if(CON_SANITIZERS AND CON_TSAN)
     message(FATAL_ERROR "CON_SANITIZERS y CON_TSAN no se pueden usar a la vez")
 endif()

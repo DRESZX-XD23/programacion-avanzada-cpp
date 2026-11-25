@@ -7,7 +7,12 @@
 #include <stdexcept>
 #include <vector>
 
-
+// Laboratorio Integrador II: los pedidos de la cafeteria del campus.
+//
+// Tres cajas dejan pedidos en una cola al mismo tiempo. Despues, dos
+// cocineros sacan pedidos de la cola al mismo tiempo, descuentan el
+// inventario, registran cada venta y anotan el resultado. Cada clase de este
+// archivo la usan varios hilos a la vez.
 
 struct Pedido {
     int id;
@@ -15,39 +20,49 @@ struct Pedido {
     int cantidad;
 };
 
-class ColaDePedidos {
+struct Venta {
+    int id;
+    int producto;
+    int cantidad;
+    double total;
+};
+
+// Una cola que pueden usar varios hilos a la vez.
+template <typename T>
+class ColaSegura {
 public:
-    ColaDePedidos() {
+    ColaSegura() {
         siguiente = 0;
     }
 
-    // Deja un pedido al final de la cola.
-    void agregar(Pedido pedido) {
-        // TODO 1: el candado protege el push_back de las tres cajas.
+    // Deja un elemento al final de la cola.
+    void agregar(T elemento) {
         std::lock_guard<std::mutex> guardia(candado);
-        pedidos.push_back(pedido);
+        elementos.push_back(elemento);
     }
 
-    std::optional<Pedido> tomar() {
+    // Saca el elemento mas antiguo que no se haya sacado todavia, o
+    // std::nullopt si ya no quedan.
+    std::optional<T> tomar() {
         std::lock_guard<std::mutex> guardia(candado);
-        int total = pedidos.size();
+        int total = elementos.size();
         if (siguiente >= total) {
             return std::nullopt;
         }
-        Pedido pedido = pedidos[siguiente];
+        T elemento = elementos[siguiente];
         siguiente++;
-        return pedido;
+        return elemento;
     }
 
-    // Cuantos pedidos quedan sin tomar.
+    // Cuantos elementos quedan sin tomar.
     int pendientes() {
         std::lock_guard<std::mutex> guardia(candado);
-        int total = pedidos.size();
+        int total = elementos.size();
         return total - siguiente;
     }
 
 private:
-    std::vector<Pedido> pedidos;
+    std::vector<T> elementos;
     int siguiente;
     std::mutex candado;
 };
@@ -60,9 +75,11 @@ public:
         stock[producto] = unidades;
     }
 
+    // Descuenta la cantidad del producto si alcanza, y devuelve true. Si no
+    // alcanza, no descuenta nada y devuelve false. Lanza
+    // std::invalid_argument si el producto no existe o si la cantidad no es
+    // positiva.
     bool descontar(int producto, int cantidad) {
-        // TODO 3: todo el metodo es una sola seccion critica. Si se lanza
-        // una excepcion, el destructor de guardia suelta el candado (RAII).
         std::lock_guard<std::mutex> guardia(candado);
 
         if (cantidad <= 0) {
@@ -75,14 +92,14 @@ public:
         }
 
         if (it->second < cantidad) {
-            return false;   // no alcanza: no se toca nada
+            return false;
         }
 
         it->second -= cantidad;
         return true;
     }
 
-    
+    // Unidades que quedan del producto (0 si no existe).
     int unidades(int producto) {
         std::lock_guard<std::mutex> guardia(candado);
         if (stock.count(producto) == 0) {
@@ -99,7 +116,6 @@ private:
 class Estadisticas {
 public:
     Estadisticas() {
-       
         despachados = 0;
         sinStock = 0;
         invalidos = 0;
@@ -130,8 +146,25 @@ public:
     }
 
 private:
-   
     std::atomic<int> despachados;
     std::atomic<int> sinStock;
     std::atomic<int> invalidos;
+};
+
+class RegistroDeVentas {
+public:
+    void anotar(Venta venta) {
+        std::lock_guard<std::mutex> guardia(candado);
+        ventas.push_back(venta);
+    }
+
+    // Una copia de todas las ventas anotadas hasta ahora.
+    std::vector<Venta> todas() {
+        std::lock_guard<std::mutex> guardia(candado);
+        return ventas;
+    }
+
+private:
+    std::vector<Venta> ventas;
+    std::mutex candado;
 };

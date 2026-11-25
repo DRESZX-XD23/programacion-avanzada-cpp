@@ -19,7 +19,6 @@ class ContadorDeVisitas {
     private:
         // TODO 1: cambia el tipo de total a std::atomic<int>. No cambies todavia
         // registrar().
-        
         std::atomic<int> total;
     public:
         ContadorDeVisitas() {
@@ -27,8 +26,6 @@ class ContadorDeVisitas {
         }
 
         void registrar() {
-            // TODO 2: con total atomico, cambia esta linea por una sola operacion
-            // atomica: total++ (o total.fetch_add(1)).
             total++;
         }
 
