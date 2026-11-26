@@ -2,45 +2,67 @@
 
 #include "contador_reservas.h"
 
-// Ejercicio 3: el buffer del sensor de temperatura del motor de un dron.
-//
-// El microcontrolador del motor lee el sensor 1000 veces por segundo y tiene
-// que recordar las ultimas 64 lecturas (en grados) para calcular su promedio
-// y su minimo.
-// En ese tipo de sistema hay una regla: una vez que el programa arranca,
-// no se pide memoria dinamica nunca mas. Pedir memoria puede tardar un
-// tiempo que nadie puede acotar, puede fallar cuando la memoria esta
-// fragmentada, y un dron en el aire no se puede reiniciar.
-//
-// TODO: escribe la clase BufferCircular, sin new, sin make_unique y sin
-// contenedores de la STL. Guarda las lecturas en un arreglo de tamano fijo
-// (double lecturas[CAPACIDAD];), dentro del objeto.
-//
-// - BufferCircular(): el buffer empieza vacio.
-// - void agregar(double valor): guarda la lectura. Si ya hay CAPACIDAD
-//   lecturas, la nueva reemplaza a la mas antigua.
-// - int getCantidad(): cuantas lecturas hay guardadas (como maximo, CAPACIDAD).
-// - double masAntigua(): la lectura mas antigua que sigue guardada.
-// - double promedio(): el promedio de las lecturas guardadas (0 si no hay).
-// - double minimo(): la menor de las lecturas guardadas (0 si no hay).
-//
-// No cambies el main: lee un millon de valores, y cuenta cuantas reservas
-// de memoria dinamica hubo mientras el sensor corria.
-//
-// Compilar:  g++ -std=c++20 -Wall -Wextra -O2 ejercicio3_buffer_sensor.cpp -o bin/ejercicio3
-// Ejecutar:  ./bin/ejercicio3
-//
-// Salida esperada:
-// Lecturas guardadas: 64
-// Mas antigua: 75.92
-// Promedio de las ultimas 64: 72.1662
-// Minimo de las ultimas 64: 60.43
-// Reservas de memoria mientras corria el sensor: 0
-
 const int CAPACIDAD = 64;
 const int LECTURAS = 1000000;
 
-// TODO: escribe aqui la clase BufferCircular.
+class BufferCircular {
+public:
+    BufferCircular() {
+        inicio = 0;
+        cantidad = 0;
+    }
+
+    void agregar(double valor) {
+        if (cantidad < CAPACIDAD) {
+            lecturas[(inicio + cantidad) % CAPACIDAD] = valor;
+            cantidad++;
+        } else {
+            lecturas[inicio] = valor;
+            inicio = (inicio + 1) % CAPACIDAD;
+        }
+    }
+
+    int getCantidad() {
+        return cantidad;
+    }
+
+    double masAntigua() {
+        if (cantidad == 0) {
+            return 0;
+        }
+        return lecturas[inicio];
+    }
+
+    double promedio() {
+        if (cantidad == 0) {
+            return 0;
+        }
+        double suma = 0;
+        for (int i = 0; i < cantidad; i++) {
+            suma += lecturas[(inicio + i) % CAPACIDAD];
+        }
+        return suma / cantidad;
+    }
+
+    double minimo() {
+        if (cantidad == 0) {
+            return 0;
+        }
+        double menor = lecturas[inicio];
+        for (int i = 1; i < cantidad; i++) {
+            double valor = lecturas[(inicio + i) % CAPACIDAD];
+            if (valor < menor) {
+                menor = valor;
+            }
+        }
+        return menor;
+    }
+
+private:
+    double lecturas[CAPACIDAD];
+    int inicio;
+    int cantidad;
+};
 
 int main() {
     BufferCircular buffer;

@@ -1,16 +1,6 @@
 #include <iostream>
 #include <vector>
 
-// Ejercicio 2: las mismas particulas, una al lado de la otra.
-//
-// Misma explosion que ejercicio2_particulas_punteros.cpp, con la misma
-// clase Particula. La diferencia es donde viven: aqui, todas dentro de un
-// solo std::vector<Particula>, en memoria contigua. Las dos versiones
-// tienen que imprimir la misma altura promedio.
-//
-// Compilar:  g++ -std=c++20 -Wall -Wextra -O2 ejercicio2_particulas_contiguas.cpp -o bin/ejercicio2_contiguas
-// Medir:     time ./bin/ejercicio2_contiguas
-
 const int PARTICULAS = 300000;
 const int CUADROS = 600;
 
@@ -45,14 +35,22 @@ private:
 };
 
 int main() {
-    // TODO 1: un std::vector<Particula> con espacio reservado para todas,
-    // y las mismas particulas que la otra version (mismas velocidades),
-    // agregadas con push_back(Particula(...)).
-
-    // TODO 2: los CUADROS cuadros, actualizando cada particula con
-    // dt = 1 / 60 de segundo.
-
-    // TODO 3: la altura promedio al final, con el mismo mensaje que la otra
-    // version.
+    std::vector<Particula> particulas;
+    particulas.reserve(PARTICULAS);
+    for (int i = 0; i < PARTICULAS; i++) {
+        float vx = (i % 200) - 100.0f;
+        float vy = (i % 97) * 1.5f;
+        particulas.push_back(Particula(0.0f, 10.0f, vx, vy));
+    }
+    for (int cuadro = 0; cuadro < CUADROS; cuadro++) {
+        for (int i = 0; i < PARTICULAS; i++) {
+            particulas[i].actualizar(1.0f / 60.0f);
+        }
+    }
+    double alturaTotal = 0;
+    for (int i = 0; i < PARTICULAS; i++) {
+        alturaTotal += particulas[i].getY();
+    }
+    std::cout << "Altura promedio al final: " << alturaTotal / PARTICULAS << std::endl;
     return 0;
 }
